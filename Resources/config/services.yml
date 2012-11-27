@@ -1,0 +1,4 @@
+services:
+    dataexporter:
+        class: EE\DataExporterBundle\Service\DataExporter
+        public: true

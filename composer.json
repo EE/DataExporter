@@ -1,0 +1,28 @@
+{
+    "name": "ee/dataexporter-bundle",
+    "type": "library",
+    "description": "Easy export data to CSV",
+    "keywords": ["exporter","csv"],
+    "homepage": "http://laboratorium.ee",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Piotr Antosik",
+            "email": "mail@piotrantosik.com",
+            "homepage": "http://piotrantosik.com",
+            "role": "Developer"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "php": ">=5.3.2",
+        "symfony/framework-bundle": ">=2.1,<2.3-dev"
+    },
+    "require-dev": {
+        "symfony/yaml": "2.1.*"
+    },
+    "autoload": {
+        "psr-0": { "EE\\DataExporterBundle": "" }
+    },
+    "target-dir": "EE/DataExporterBundle"
+}
