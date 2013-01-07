@@ -146,7 +146,7 @@ class DataExporter
                 if (isset($this->data[0])) {
                     //last item
                     end($columns);
-                    if ($key !== key($columns)) {
+                    if ($key != key($columns)) {
                         $this->data[0] = $this->data[0] . $column . $this->separator;
                     }
                     else {
