@@ -11,7 +11,6 @@ use Symfony\Component\HttpFoundation\ResponseHeaderBag;
  */
 class DataExporter
 {
-
     protected $columns;
     protected $data;
     protected $format;
@@ -19,12 +18,6 @@ class DataExporter
     protected $escape;
     protected $fileName;
     protected $supportedFormat = array('csv', 'xls');
-
-    /**
-     * @param string            $separator
-     */
-    public function __construct() {
-    }
 
     /**
      * @param       $format
@@ -148,19 +141,30 @@ class DataExporter
             $this->columns[] = $key;
 
             if ('csv' === $this->format) {
-                if (isset($this->data[0]))
-                    $this->data[0] = $this->data[0] . $column.$this->separator;
-                else
-                    $this->data[] = $column.$this->separator;
+
+                //last item
+                if (isset($this->data[0])) {
+                    //last item
+                    end($columns);
+                    if ($key !== key($columns)) {
+                        $this->data[0] = $this->data[0] . $column . $this->separator;
+                    }
+                    else {
+                        $this->data[0] = $this->data[0] . $column;
+                    }
+                }
+                else {
+                    $this->data[] = $column . $this->separator;
+                }
             }
             elseif ('xls' === $this->format) {
-
+                //first item
                 reset($columns);
                 if ($key === key($columns))
                     $this->data .= '<tr>';
 
                 $this->data .= sprintf('<td>%s</td>', $column);
-
+                //last item
                 end($columns);
                 if ($key === key($columns))
                     $this->data .= '</tr>';
