@@ -66,7 +66,6 @@ class DataExporter
 
     /**
      * @param $data
-     * @throws \RuntimeException
      */
     public function setData($data)
     {
@@ -138,7 +137,6 @@ class DataExporter
 
     /**
      * @param array $columns
-     * @throws \RuntimeException
      */
     public function addColumns(Array $columns) {
 
