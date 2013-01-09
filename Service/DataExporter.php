@@ -70,6 +70,17 @@ class DataExporter
         $this->data .= "</table></body></html>";
     }
 
+    public function escape($data)
+    {
+        $data = mb_ereg_replace(
+            sprintf('(%s)', $this->separator),
+            sprintf('%s\1', $this->escape),
+            $data
+        );
+
+        return $data;
+    }
+
     /**
      * @param $data
      */
@@ -87,10 +98,10 @@ class DataExporter
             switch ($this->format) {
                 case 'csv':
                     $tempRow = array();
-                break;
+                    break;
                 case 'xls' || 'html':
                     $tempRow = '';
-                break;
+                    break;
             }
 
             if (is_object($row)) {
@@ -101,7 +112,7 @@ class DataExporter
                         if ($temp_val === null)
                             $temp_val = ' ';
 
-                        $temp_val = strip_tags(str_replace($this->separator, ' ', $temp_val));
+                        $temp_val = $this->escape($temp_val);
                         $tempRow[] = $temp_val;
                     }
                 }
@@ -116,7 +127,7 @@ class DataExporter
                         if ($temp_val === null)
                             $temp_val = ' ';
 
-                        $temp_val = strip_tags(str_replace($this->separator, ' ', $temp_val));
+                        $temp_val = $this->escape($temp_val);
                         $tempRow[] = $temp_val;
                     }
 
@@ -208,19 +219,19 @@ class DataExporter
             case 'csv':
                 $response->headers->set('Content-Type', 'text/csv');
                 $response->setContent($this->prepareCSV());
-            break;
+                break;
             case 'xls':
                 //close tags
                 $this->closeXLS();
                 $response->headers->set('Content-Type', 'application/vnd.ms-excel');
                 $response->setContent($this->data);
-            break;
+                break;
             case 'html':
                 //close tags
                 $this->closeHTML();
                 $response->headers->set('Content-Type', 'text/html');
                 $response->setContent($this->data);
-            break;
+                break;
         }
 
         $response->headers->set('Cache-Control', 'public');
