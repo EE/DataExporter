@@ -79,6 +79,21 @@ class DataExporterTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($result, $exporter->render()->getContent());
     }
 
+    public function testXMLExport()
+    {
+        $exporter = new DataExporter();
+        $exporter->setOptions('xml', array('fileName' => 'file'));
+        $exporter->addColumns(array('test1', 'test2'));
+        $exporter->setData(array(
+                array('1a', '1b'),
+                array('2a', '2b'),
+            ));
+
+        $result = '<?xml version="1.0" encoding="UTF-8"?><table><row><column name="0">1a</column><column name="1">1b</column></row><row><column name="0">2a</column><column name="1">2b</column></row></table>';
+
+        $this->assertEquals($result, $exporter->render()->getContent());
+    }
+
     /**
      * @expectedException RuntimeException
      */

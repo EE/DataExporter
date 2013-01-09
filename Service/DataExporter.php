@@ -17,7 +17,7 @@ class DataExporter
     protected $separator;
     protected $escape;
     protected $fileName;
-    protected $supportedFormat = array('csv', 'xls', 'html');
+    protected $supportedFormat = array('csv', 'xls', 'html', 'xml');
 
     /**
      * @param       $format
@@ -47,9 +47,23 @@ class DataExporter
             //options for html
             $this->openHTML();
         }
+        else if ('xml' === $format) {
+            //options for xml
+            $this->openXML();
+        }
 
         //fileName
         array_key_exists('fileName', $options) ? $this->fileName = $options['fileName'].'.'.$this->format : $this->fileName = 'Data export'.'.'.$this->format;
+    }
+
+    public function openXML()
+    {
+        $this->data = '<?xml version="1.0" encoding="UTF-8"?><table>';
+    }
+
+    public function closeXML()
+    {
+        $this->data .= "</table>";
     }
 
     public function openXLS()
@@ -99,7 +113,9 @@ class DataExporter
                 case 'csv':
                     $tempRow = array();
                     break;
-                case 'xls' || 'html':
+                case 'xls':
+                case 'html':
+                case 'xml':
                     $tempRow = '';
                     break;
             }
@@ -138,14 +154,24 @@ class DataExporter
             switch ($this->format) {
                 case 'csv':
                     $this->data[] = implode($this->separator, $tempRow);
-                    break;
-                case 'xls' || 'html':
+                break;
+                case 'xls':
+                case 'html':
                     $this->data .= '<tr>';
                     foreach ($tempRow as $val) {
                         $this->data .= '<td>'.$val.'</td>';
                     }
                     $this->data .= '</tr>';
-                    break;
+                break;
+                case 'xml':
+                    $this->data .= '<row>';
+                    $i = 0;
+                    foreach ($tempRow as $val) {
+                        $this->data .= '<column name="'.$this->columns[$i].'">'.$val.'</column>';
+                        $i++;
+                    }
+                    $this->data .= '</row>';
+                break;
             }
 
         }
@@ -219,19 +245,25 @@ class DataExporter
             case 'csv':
                 $response->headers->set('Content-Type', 'text/csv');
                 $response->setContent($this->prepareCSV());
-                break;
+            break;
             case 'xls':
                 //close tags
                 $this->closeXLS();
                 $response->headers->set('Content-Type', 'application/vnd.ms-excel');
                 $response->setContent($this->data);
-                break;
+            break;
             case 'html':
                 //close tags
                 $this->closeHTML();
                 $response->headers->set('Content-Type', 'text/html');
                 $response->setContent($this->data);
-                break;
+            break;
+            case 'xml':
+                //close tags
+                $this->closeXML();
+                $response->headers->set('Content-Type', 'text/xml');
+                $response->setContent($this->data);
+            break;
         }
 
         $response->headers->set('Cache-Control', 'public');
