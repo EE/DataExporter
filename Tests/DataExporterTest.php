@@ -64,6 +64,36 @@ class DataExporterTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($result, $exporter->render()->getContent());
     }
 
+    public function testHTMLExport()
+    {
+        $exporter = new DataExporter();
+        $exporter->setOptions('html', array('fileName' => 'file'));
+        $exporter->addColumns(array('test1', 'test2'));
+        $exporter->setData(array(
+                array('1a', '1b'),
+                array('2a', '2b'),
+            ));
+
+        $result = '<!DOCTYPE ><html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" /><meta name="Generator" content="https://github.com/EE/DataExporter"></head><body><table><tr><td>test1</td><td>test2</td></tr><tr><td>1a</td><td>1b</td></tr><tr><td>2a</td><td>2b</td></tr></table></body></html>';
+
+        $this->assertEquals($result, $exporter->render()->getContent());
+    }
+
+    public function testXMLExport()
+    {
+        $exporter = new DataExporter();
+        $exporter->setOptions('xml', array('fileName' => 'file'));
+        $exporter->addColumns(array('test1', 'test2'));
+        $exporter->setData(array(
+                array('1a', '1b'),
+                array('2a', '2b'),
+            ));
+
+        $result = '<?xml version="1.0" encoding="UTF-8"?><table><row><column name="0">1a</column><column name="1">1b</column></row><row><column name="0">2a</column><column name="1">2b</column></row></table>';
+
+        $this->assertEquals($result, $exporter->render()->getContent());
+    }
+
     /**
      * @expectedException RuntimeException
      */
