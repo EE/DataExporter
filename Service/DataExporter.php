@@ -17,7 +17,7 @@ class DataExporter
     protected $separator;
     protected $escape;
     protected $fileName;
-    protected $supportedFormat = array('csv', 'xls');
+    protected $supportedFormat = array('csv', 'xls', 'html', 'xml');
 
     /**
      * @param       $format
@@ -43,9 +43,27 @@ class DataExporter
             //options for xls
             $this->openXLS();
         }
+        else if ('html' === $format) {
+            //options for html
+            $this->openHTML();
+        }
+        else if ('xml' === $format) {
+            //options for xml
+            $this->openXML();
+        }
 
         //fileName
         array_key_exists('fileName', $options) ? $this->fileName = $options['fileName'].'.'.$this->format : $this->fileName = 'Data export'.'.'.$this->format;
+    }
+
+    public function openXML()
+    {
+        $this->data = '<?xml version="1.0" encoding="UTF-8"?><table>';
+    }
+
+    public function closeXML()
+    {
+        $this->data .= "</table>";
     }
 
     public function openXLS()
@@ -55,6 +73,26 @@ class DataExporter
 
     public function closeXLS() {
         $this->data .= "</table></body></html>";
+    }
+
+    public function openHTML()
+    {
+        $this->data = "<!DOCTYPE ><html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" /><meta name=\"Generator\" content=\"https://github.com/EE/DataExporter\"></head><body><table>";
+    }
+
+    public function closeHTML() {
+        $this->data .= "</table></body></html>";
+    }
+
+    public function escape($data)
+    {
+        $data = mb_ereg_replace(
+            sprintf('(%s)', $this->separator),
+            sprintf('%s\1', $this->escape),
+            $data
+        );
+
+        return $data;
     }
 
     /**
@@ -76,6 +114,8 @@ class DataExporter
                     $tempRow = array();
                     break;
                 case 'xls':
+                case 'html':
+                case 'xml':
                     $tempRow = '';
                     break;
             }
@@ -88,7 +128,7 @@ class DataExporter
                         if ($temp_val === null)
                             $temp_val = ' ';
 
-                        $temp_val = strip_tags(str_replace($this->separator, ' ', $temp_val));
+                        $temp_val = $this->escape($temp_val);
                         $tempRow[] = $temp_val;
                     }
                 }
@@ -103,7 +143,7 @@ class DataExporter
                         if ($temp_val === null)
                             $temp_val = ' ';
 
-                        $temp_val = strip_tags(str_replace($this->separator, ' ', $temp_val));
+                        $temp_val = $this->escape($temp_val);
                         $tempRow[] = $temp_val;
                     }
 
@@ -114,14 +154,24 @@ class DataExporter
             switch ($this->format) {
                 case 'csv':
                     $this->data[] = implode($this->separator, $tempRow);
-                    break;
+                break;
                 case 'xls':
+                case 'html':
                     $this->data .= '<tr>';
                     foreach ($tempRow as $val) {
                         $this->data .= '<td>'.$val.'</td>';
                     }
                     $this->data .= '</tr>';
-                    break;
+                break;
+                case 'xml':
+                    $this->data .= '<row>';
+                    $i = 0;
+                    foreach ($tempRow as $val) {
+                        $this->data .= '<column name="'.$this->columns[$i].'">'.$val.'</column>';
+                        $i++;
+                    }
+                    $this->data .= '</row>';
+                break;
             }
 
         }
@@ -157,7 +207,7 @@ class DataExporter
                     $this->data[] = $column . $this->separator;
                 }
             }
-            elseif ('xls' === $this->format) {
+            elseif ('xls' === $this->format || 'html' === $this->format) {
                 //first item
                 reset($columns);
                 if ($key === key($columns))
@@ -195,13 +245,25 @@ class DataExporter
             case 'csv':
                 $response->headers->set('Content-Type', 'text/csv');
                 $response->setContent($this->prepareCSV());
-                break;
+            break;
             case 'xls':
                 //close tags
                 $this->closeXLS();
                 $response->headers->set('Content-Type', 'application/vnd.ms-excel');
                 $response->setContent($this->data);
-                break;
+            break;
+            case 'html':
+                //close tags
+                $this->closeHTML();
+                $response->headers->set('Content-Type', 'text/html');
+                $response->setContent($this->data);
+            break;
+            case 'xml':
+                //close tags
+                $this->closeXML();
+                $response->headers->set('Content-Type', 'text/xml');
+                $response->setContent($this->data);
+            break;
         }
 
         $response->headers->set('Cache-Control', 'public');

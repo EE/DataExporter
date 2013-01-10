@@ -2,7 +2,7 @@
     "name": "ee/dataexporter-bundle",
     "type": "library",
     "description": "Easy export data to CSV or XLS",
-    "keywords": ["exporter","csv","xls"],
+    "keywords": ["exporter","csv","xls", "xml"],
     "homepage": "http://laboratorium.ee",
     "license": "MIT",
     "authors": [
