@@ -3,7 +3,6 @@
 namespace EE\DataExporterBundle\Service;
 
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 
 /**
  * @author Piotr Antosik <mail@piotrantosik.com>
@@ -125,12 +124,12 @@ class DataExporter
                 foreach ($this->columns as $key) {
                     $method = 'get'. ucfirst($key);
                     if (method_exists($row, $method)) {
-                        $temp_val = $row->$method();
-                        if ($temp_val === null)
-                            $temp_val = ' ';
+                        $tempVal = $row->$method();
+                        if ($tempVal === null)
+                            $tempVal = ' ';
 
-                        $temp_val = $this->escape($temp_val);
-                        $tempRow[] = $temp_val;
+                        $tempVal = $this->escape($tempVal);
+                        $tempRow[] = $tempVal;
                     }
                 }
             }
@@ -138,12 +137,12 @@ class DataExporter
                 foreach ($this->columns as $key)
                 {
                     if (array_key_exists($key, $row)) {
-                        $temp_val = $row[$key];
-                        if ($temp_val === null)
-                            $temp_val = ' ';
+                        $tempVal = $row[$key];
+                        if ($tempVal === null)
+                            $tempVal = ' ';
 
-                        $temp_val = $this->escape($temp_val);
-                        $tempRow[] = $temp_val;
+                        $tempVal = $this->escape($tempVal);
+                        $tempRow[] = $tempVal;
                     }
                 }
             }
