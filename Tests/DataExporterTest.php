@@ -94,6 +94,21 @@ class DataExporterTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($result, $exporter->render()->getContent());
     }
 
+    public function testJSONExport()
+    {
+        $exporter = new DataExporter();
+        $exporter->setOptions('json', array('fileName' => 'file'));
+        $exporter->addColumns(array('test1', 'test2'));
+        $exporter->setData(array(
+                array('1a', '1b'),
+                array('2a', '2b'),
+            ));
+
+        $result = '{"1":{"test1":"1a","test2":"1b"},"2":{"test1":"2a","test2":"2b"}}';
+
+        $this->assertEquals($result, $exporter->render()->getContent());
+    }
+
     /**
      * @expectedException RuntimeException
      */

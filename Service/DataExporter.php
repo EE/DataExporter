@@ -3,7 +3,6 @@
 namespace EE\DataExporterBundle\Service;
 
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 
 /**
  * @author Piotr Antosik <mail@piotrantosik.com>
@@ -17,7 +16,7 @@ class DataExporter
     protected $separator;
     protected $escape;
     protected $fileName;
-    protected $supportedFormat = array('csv', 'xls', 'html', 'xml');
+    protected $supportedFormat = array('csv', 'xls', 'html', 'xml', 'json');
 
     /**
      * @param       $format
@@ -111,6 +110,7 @@ class DataExporter
         {
             switch ($this->format) {
                 case 'csv':
+                case 'json':
                     $tempRow = array();
                     break;
                 case 'xls':
@@ -124,36 +124,35 @@ class DataExporter
                 foreach ($this->columns as $key) {
                     $method = 'get'. ucfirst($key);
                     if (method_exists($row, $method)) {
-                        $temp_val = $row->$method();
-                        if ($temp_val === null)
-                            $temp_val = ' ';
+                        $tempVal = $row->$method();
+                        if ($tempVal === null)
+                            $tempVal = ' ';
 
-                        $temp_val = $this->escape($temp_val);
-                        $tempRow[] = $temp_val;
+                        $tempVal = $this->escape($tempVal);
+                        $tempRow[] = $tempVal;
                     }
                 }
-
             }
             else {
                 foreach ($this->columns as $key)
                 {
-
                     if (array_key_exists($key, $row)) {
-                        $temp_val = $row[$key];
-                        if ($temp_val === null)
-                            $temp_val = ' ';
+                        $tempVal = $row[$key];
+                        if ($tempVal === null)
+                            $tempVal = ' ';
 
-                        $temp_val = $this->escape($temp_val);
-                        $tempRow[] = $temp_val;
+                        $tempVal = $this->escape($tempVal);
+                        $tempRow[] = $tempVal;
                     }
-
                 }
-
             }
 
             switch ($this->format) {
                 case 'csv':
                     $this->data[] = implode($this->separator, $tempRow);
+                break;
+                case 'json':
+                    $this->data[] = array_combine($this->data[0], $tempRow);
                 break;
                 case 'xls':
                 case 'html':
@@ -219,6 +218,9 @@ class DataExporter
                 if ($key === key($columns))
                     $this->data .= '</tr>';
             }
+            elseif ('json' === $this->format) {
+                $this->data[0] = array_values($columns);
+            }
         }
 
     }
@@ -246,6 +248,12 @@ class DataExporter
                 $response->headers->set('Content-Type', 'text/csv');
                 $response->setContent($this->prepareCSV());
             break;
+            case 'json':
+                $response->headers->set('Content-Type', 'application/json');
+                //remove first row from data
+                unset($this->data[0]);
+                $response->setContent(json_encode($this->data));
+                break;
             case 'xls':
                 //close tags
                 $this->closeXLS();
