@@ -105,7 +105,7 @@ class DataExporterTest extends \PHPUnit_Framework_TestCase
                 array('col1' => '2a', 'col2' => '2b'),
             ));
 
-        $result = '{"1":{"[col1]":"1a","[col2]":"1b","[col3]":"1c"},"2":{"[col1]":"2a","[col2]":"2b","[col3]":null}}';
+        $result = '{"1":{"[col1]":"1a","[col2]":"1b","[col3]":"1c"},"2":{"[col1]":"2a","[col2]":"2b","[col3]":""}}';
 
         $this->assertEquals($result, $exporter->render()->getContent());
     }

@@ -124,11 +124,7 @@ class DataExporter
             }
 
             $tempRow = array_map(function ($column) use ($row, $accessor) {
-                    if ('csv' === $this->format) {
-                        return $this->escape($accessor->getValue($row, $column));
-                    }
-
-                    return $accessor->getValue($row, $column);
+                    return $this->escape($accessor->getValue($row, $column));
                 }, $this->columns);
 
             switch ($this->format) {
