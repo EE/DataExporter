@@ -3,10 +3,11 @@
 namespace EE\DataExporterBundle\Service;
 
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\PropertyAccess\PropertyAccess;
 
 /**
  * @author Piotr Antosik <mail@piotrantosik.com>
- * @version 0.2
+ * @version 0.3
  */
 class DataExporter
 {
@@ -95,9 +96,9 @@ class DataExporter
     }
 
     /**
-     * @param $data
+     * @param $rows
      */
-    public function setData($data)
+    public function setData($rows)
     {
         if (empty($this->format)) {
             throw new \RuntimeException(sprintf('First use setOptions!'));
@@ -106,7 +107,9 @@ class DataExporter
             throw new \RuntimeException(sprintf('First use addColumns to set export column!'));
         }
 
-        foreach ($data as $row)
+        $accessor = PropertyAccess::getPropertyAccessor();
+
+        foreach ($rows as $row)
         {
             switch ($this->format) {
                 case 'csv':
@@ -120,40 +123,17 @@ class DataExporter
                     break;
             }
 
-            if (is_object($row)) {
-                foreach ($this->columns as $key) {
-                    $method = 'get'. ucfirst($key);
-                    if (method_exists($row, $method)) {
-                        $tempVal = $row->$method();
-                        if ($tempVal === null)
-                            $tempVal = ' ';
-
-                        $tempVal = $this->escape($tempVal);
-                        $tempRow[] = $tempVal;
-                    }
-                }
-            }
-            else {
-                foreach ($this->columns as $key)
-                {
-                    if (array_key_exists($key, $row)) {
-                        $tempVal = $row[$key];
-                        if ($tempVal === null)
-                            $tempVal = ' ';
-
-                        $tempVal = $this->escape($tempVal);
-                        $tempRow[] = $tempVal;
-                    }
-                }
-            }
+            $tempRow = array_map(function ($column) use ($row, $accessor) {
+                    return $this->escape($accessor->getValue($row, $column));
+                }, $this->columns);
 
             switch ($this->format) {
                 case 'csv':
                     $this->data[] = implode($this->separator, $tempRow);
-                break;
+                    break;
                 case 'json':
                     $this->data[] = array_combine($this->data[0], $tempRow);
-                break;
+                    break;
                 case 'xls':
                 case 'html':
                     $this->data .= '<tr>';
@@ -161,7 +141,7 @@ class DataExporter
                         $this->data .= '<td>'.$val.'</td>';
                     }
                     $this->data .= '</tr>';
-                break;
+                    break;
                 case 'xml':
                     $this->data .= '<row>';
                     $i = 0;
@@ -170,7 +150,7 @@ class DataExporter
                         $i++;
                     }
                     $this->data .= '</row>';
-                break;
+                    break;
             }
 
         }
@@ -180,14 +160,19 @@ class DataExporter
     /**
      * @param array $columns
      */
-    public function addColumns(Array $columns) {
+    public function setColumns(Array $columns) {
 
         if (empty($this->format)) {
             throw new \RuntimeException(sprintf('First use setOptions!'));
         }
 
         foreach ($columns as $key => $column) {
-            $this->columns[] = $key;
+            if (is_integer($key)) {
+                $this->columns[] = $column;
+            }
+            else {
+                $this->columns[] = $key;
+            }
 
             if ('csv' === $this->format) {
 
@@ -247,7 +232,7 @@ class DataExporter
             case 'csv':
                 $response->headers->set('Content-Type', 'text/csv');
                 $response->setContent($this->prepareCSV());
-            break;
+                break;
             case 'json':
                 $response->headers->set('Content-Type', 'application/json');
                 //remove first row from data
@@ -259,19 +244,19 @@ class DataExporter
                 $this->closeXLS();
                 $response->headers->set('Content-Type', 'application/vnd.ms-excel');
                 $response->setContent($this->data);
-            break;
+                break;
             case 'html':
                 //close tags
                 $this->closeHTML();
                 $response->headers->set('Content-Type', 'text/html');
                 $response->setContent($this->data);
-            break;
+                break;
             case 'xml':
                 //close tags
                 $this->closeXML();
                 $response->headers->set('Content-Type', 'text/xml');
                 $response->setContent($this->data);
-            break;
+                break;
         }
 
         $response->headers->set('Cache-Control', 'public');
