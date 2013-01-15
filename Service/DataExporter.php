@@ -84,11 +84,11 @@ class DataExporter
         $this->data .= "</table></body></html>";
     }
 
-    public function escape($data)
+    public static function escape($data, $separator, $escape)
     {
         $data = mb_ereg_replace(
-            sprintf('(%s)', $this->separator),
-            sprintf('%s\1', $this->escape),
+            sprintf('(%s)', $separator),
+            sprintf('%s\1', $escape),
             $data
         );
 
@@ -108,6 +108,8 @@ class DataExporter
         }
 
         $accessor = PropertyAccess::getPropertyAccessor();
+        $separator = $this->separator;
+        $escape = $this->escape;
 
         foreach ($rows as $row)
         {
@@ -123,8 +125,8 @@ class DataExporter
                     break;
             }
 
-            $tempRow = array_map(function ($column) use ($row, $accessor) {
-                    return DataExporter::escape($accessor->getValue($row, $column));
+            $tempRow = array_map(function ($column) use ($row, $accessor, $separator, $escape) {
+                    return DataExporter::escape($accessor->getValue($row, $column), $separator, $escape);
                 }, $this->columns);
 
             switch ($this->format) {
