@@ -1,6 +1,8 @@
 EEDataExporter
 -------------
 
+[![Build Status](https://api.travis-ci.org/Antek88/DataExporter.png?branch=master)](http://travis-ci.org/Antek88/DataExporter)
+
 ## Installation
 
 ### Download EEDataexporterBundle using composer
