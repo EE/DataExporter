@@ -124,7 +124,7 @@ class DataExporter
             }
 
             $tempRow = array_map(function ($column) use ($row, $accessor) {
-                    return self::escape($accessor->getValue($row, $column));
+                    return DataExporter::escape($accessor->getValue($row, $column));
                 }, $this->columns);
 
             switch ($this->format) {
