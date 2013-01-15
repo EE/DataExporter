@@ -22,42 +22,54 @@ public function registerBundles()
 }
 ```
 
-Usage example from array:
+## Using
+
+It's possible to use DataExporter with nested array or object.
+Example columns definition with array:
+```php
+[col1] is equals with accessing $array['col1']
+eg. [col1][col2] is equals with $array['col1']['col2']
+```
+With object:
+```php
+col1 is equals with $object->getCol1(), hasCol1(), isCol1(), $object->col1 or magic method __get('col1')
+```
+
+### Usage example from array:
 
 ```php
 $exporter = $this->get('ee.dataexporter');
-$exporter->setOptions('csv', array('separator' => ',', 'fileName' => 'file'));
-$exporter->addColumns(array('col1' => 'Column 1 label',
-                      'col2' => 'Column 2 label'
-                     ));
-
+$exporter->setOptions('csv', array('fileName' => 'file', 'separator' => ';'));
+$exporter->setColumns(array('[col1]', '[col2]', '[col3]'));
 $exporter->setData(array(
-        array('col1' => 'data1', 'col2' => 'data1a'),
-        array('col1' => 'data2', 'col2' => 'data2a')
+        array('col1' => '1a', 'col2' => '1b', 'col3' => '1c'),
+        array('col1' => '2a', 'col2' => '2b'),
     ));
 
 return $exporter->render();
 ```
 
-And from object:
+### And from object:
 
 ```php
 $exporter = $this->get('ee.dataexporter');
 $testObject = new TestObject();
 
 $exporter->setOptions('xls', array('fileName' => 'file'));
-$exporter->addColumns(array('col1' => 'Label1', 'col2' => 'Label2'));
+$exporter->setColumns(array('col1' => 'Label1', 'col2' => 'Label2', 'col3.col1' => 'From object two'));
 $exporter->setData(array($testObject));
-return $exporter->render();
 
 class TestObject
 {
     private $col1;
     private $col2;
+    private $col3;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->col1 = '1a';
         $this->col2 = '1b';
+        $this->col3 = new TestObject2;
     }
 
     public function setCol2($col2)
@@ -68,6 +80,37 @@ class TestObject
     public function getCol2()
     {
         return $this->col2;
+    }
+
+    public function setCol1($col1)
+    {
+        $this->col1 = $col1;
+    }
+
+    public function getCol1()
+    {
+        return $this->col1;
+    }
+
+    public function setCol3($col3)
+    {
+        $this->col3 = $col3;
+    }
+
+    public function getCol3()
+    {
+        return $this->col3;
+    }
+
+}
+
+class TestObject2
+{
+    private $col1;
+
+    public function __construct()
+    {
+        $this->col1 = 'Object two';
     }
 
     public function setCol1($col1)
