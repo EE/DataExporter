@@ -104,7 +104,7 @@ class DataExporter
             throw new \RuntimeException(sprintf('First use setOptions!'));
         }
         if (empty($this->columns)) {
-            throw new \RuntimeException(sprintf('First use addColumns to set export column!'));
+            throw new \RuntimeException(sprintf('First use setColumns to set columns to export!'));
         }
 
         $accessor = PropertyAccess::getPropertyAccessor();
