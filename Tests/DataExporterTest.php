@@ -3,6 +3,7 @@
 namespace EE\DataExporterBundle\Test\Service;
 
 use EE\DataExporterBundle\Service\DataExporter;
+use EE\DataExporterBundle\Tests\TestObject;
 
 class DataExporterTest extends \PHPUnit_Framework_TestCase
 {
@@ -10,13 +11,13 @@ class DataExporterTest extends \PHPUnit_Framework_TestCase
     {
         $exporter = new DataExporter();
         $exporter->setOptions('csv', array('fileName' => 'file', 'separator' => ';'));
-        $exporter->addColumns(array('test1', 'test2', 'test3'));
+        $exporter->setColumns(array('[col1]', '[col2]', '[col3]'));
         $exporter->setData(array(
-                array('1a', '1b', '1c'),
-                array('2a', '2b'),
+                array('col1' => '1a', 'col2' => '1b', 'col3' => '1c'),
+                array('col1' => '2a', 'col2' => '2b'),
             ));
 
-        $result = "test1;test2;test3\n1a;1b;1c\n2a;2b";
+        $result = "[col1];[col2];[col3]\n1a;1b;1c\n2a;2b;";
 
         $this->assertEquals($result, $exporter->render()->getContent());
     }
@@ -25,13 +26,13 @@ class DataExporterTest extends \PHPUnit_Framework_TestCase
     {
         $exporter = new DataExporter();
         $exporter->setOptions('xls', array('fileName' => 'file'));
-        $exporter->addColumns(array('test1', 'test2'));
+        $exporter->setColumns(array('[col1]', '[col2]', '[col3]'));
         $exporter->setData(array(
-                array('1a', '1b'),
-                array('2a', '2b'),
+                array('col1' => '1a', 'col2' => '1b', 'col3' => '1c'),
+                array('col1' => '2a', 'col2' => '2b'),
             ));
 
-        $result = '<!DOCTYPE ><html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" /><meta name="ProgId" content="Excel.Sheet"><meta name="Generator" content="https://github.com/EE/DataExporter"></head><body><table><tr><td>test1</td><td>test2</td></tr><tr><td>1a</td><td>1b</td></tr><tr><td>2a</td><td>2b</td></tr></table></body></html>';
+        $result = '<!DOCTYPE ><html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" /><meta name="ProgId" content="Excel.Sheet"><meta name="Generator" content="https://github.com/EE/DataExporter"></head><body><table><tr><td>[col1]</td><td>[col2]</td><td>[col3]</td></tr><tr><td>1a</td><td>1b</td><td>1c</td></tr><tr><td>2a</td><td>2b</td><td></td></tr></table></body></html>';
 
         $this->assertEquals($result, $exporter->render()->getContent());
     }
@@ -42,7 +43,7 @@ class DataExporterTest extends \PHPUnit_Framework_TestCase
         $testObject = new TestObject();
 
         $exporter->setOptions('csv', array('fileName' => 'file', 'separator' => ';'));
-        $exporter->addColumns(array('col1' => 'Label1', 'col2' => 'Label2'));
+        $exporter->setColumns(array('col1' => 'Label1', 'col2' => 'Label2'));
         $exporter->setData(array($testObject));
 
         $result = "Label1;Label2\n1a;1b";
@@ -56,10 +57,10 @@ class DataExporterTest extends \PHPUnit_Framework_TestCase
         $testObject = new TestObject();
 
         $exporter->setOptions('xls', array('fileName' => 'file'));
-        $exporter->addColumns(array('col1' => 'Label1', 'col2' => 'Label2'));
+        $exporter->setColumns(array('col1' => 'Label1', 'col2' => 'Label2', 'col3.col1' => 'From object two'));
         $exporter->setData(array($testObject));
 
-        $result = '<!DOCTYPE ><html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" /><meta name="ProgId" content="Excel.Sheet"><meta name="Generator" content="https://github.com/EE/DataExporter"></head><body><table><tr><td>Label1</td><td>Label2</td></tr><tr><td>1a</td><td>1b</td></tr></table></body></html>';
+        $result = '<!DOCTYPE ><html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" /><meta name="ProgId" content="Excel.Sheet"><meta name="Generator" content="https://github.com/EE/DataExporter"></head><body><table><tr><td>Label1</td><td>Label2</td><td>From object two</td></tr><tr><td>1a</td><td>1b</td><td>Object two</td></tr></table></body></html>';
 
         $this->assertEquals($result, $exporter->render()->getContent());
     }
@@ -68,13 +69,13 @@ class DataExporterTest extends \PHPUnit_Framework_TestCase
     {
         $exporter = new DataExporter();
         $exporter->setOptions('html', array('fileName' => 'file'));
-        $exporter->addColumns(array('test1', 'test2'));
+        $exporter->setColumns(array('[col1]' => 'Column 1', '[col2]' => 'Column 2', '[col3]' => 'Column 3'));
         $exporter->setData(array(
-                array('1a', '1b'),
-                array('2a', '2b'),
+                array('col1' => '1a', 'col2' => '1b', 'col3' => '1c'),
+                array('col1' => '2a', 'col2' => '2b'),
             ));
 
-        $result = '<!DOCTYPE ><html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" /><meta name="Generator" content="https://github.com/EE/DataExporter"></head><body><table><tr><td>test1</td><td>test2</td></tr><tr><td>1a</td><td>1b</td></tr><tr><td>2a</td><td>2b</td></tr></table></body></html>';
+        $result = '<!DOCTYPE ><html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" /><meta name="Generator" content="https://github.com/EE/DataExporter"></head><body><table><tr><td>Column 1</td><td>Column 2</td><td>Column 3</td></tr><tr><td>1a</td><td>1b</td><td>1c</td></tr><tr><td>2a</td><td>2b</td><td></td></tr></table></body></html>';
 
         $this->assertEquals($result, $exporter->render()->getContent());
     }
@@ -83,13 +84,13 @@ class DataExporterTest extends \PHPUnit_Framework_TestCase
     {
         $exporter = new DataExporter();
         $exporter->setOptions('xml', array('fileName' => 'file'));
-        $exporter->addColumns(array('test1', 'test2'));
+        $exporter->setColumns(array('[col1]', '[col2]', '[col3]'));
         $exporter->setData(array(
-                array('1a', '1b'),
-                array('2a', '2b'),
+                array('col1' => '1a', 'col2' => '1b', 'col3' => '1c'),
+                array('col1' => '2a', 'col2' => '2b'),
             ));
 
-        $result = '<?xml version="1.0" encoding="UTF-8"?><table><row><column name="0">1a</column><column name="1">1b</column></row><row><column name="0">2a</column><column name="1">2b</column></row></table>';
+        $result = '<?xml version="1.0" encoding="UTF-8"?><table><row><column name="[col1]">1a</column><column name="[col2]">1b</column><column name="[col3]">1c</column></row><row><column name="[col1]">2a</column><column name="[col2]">2b</column><column name="[col3]"></column></row></table>';
 
         $this->assertEquals($result, $exporter->render()->getContent());
     }
@@ -98,13 +99,13 @@ class DataExporterTest extends \PHPUnit_Framework_TestCase
     {
         $exporter = new DataExporter();
         $exporter->setOptions('json', array('fileName' => 'file'));
-        $exporter->addColumns(array('test1', 'test2'));
+        $exporter->setColumns(array('[col1]', '[col2]', '[col3]'));
         $exporter->setData(array(
-                array('1a', '1b'),
-                array('2a', '2b'),
+                array('col1' => '1a', 'col2' => '1b', 'col3' => '1c'),
+                array('col1' => '2a', 'col2' => '2b'),
             ));
 
-        $result = '{"1":{"test1":"1a","test2":"1b"},"2":{"test1":"2a","test2":"2b"}}';
+        $result = '{"1":{"[col1]":"1a","[col2]":"1b","[col3]":"1c"},"2":{"[col1]":"2a","[col2]":"2b","[col3]":null}}';
 
         $this->assertEquals($result, $exporter->render()->getContent());
     }
@@ -143,39 +144,7 @@ class DataExporterTest extends \PHPUnit_Framework_TestCase
     public function testAddColumnsException()
     {
         $exporter = new DataExporter();
-        $exporter->addColumns(array());
-    }
-
-}
-
-class TestObject
-{
-    private $col1;
-    private $col2;
-
-    public function __construct() {
-        $this->col1 = '1a';
-        $this->col2 = '1b';
-    }
-
-    public function setCol2($col2)
-    {
-        $this->col2 = $col2;
-    }
-
-    public function getCol2()
-    {
-        return $this->col2;
-    }
-
-    public function setCol1($col1)
-    {
-        $this->col1 = $col1;
-    }
-
-    public function getCol1()
-    {
-        return $this->col1;
+        $exporter->setColumns(array());
     }
 
 }
