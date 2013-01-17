@@ -17,6 +17,7 @@ class DataExporter
     protected $separator;
     protected $escape;
     protected $fileName;
+    protected $memory;
     protected $supportedFormat = array( 'csv', 'xls', 'html', 'xml', 'json' );
 
     /**
@@ -49,11 +50,20 @@ class DataExporter
             $this->openXML();
         }
 
+        //convert key and values to lowercase
+        $options = array_change_key_case($options, CASE_LOWER);
+        $options = array_map('strtolower', $options);
+
         //fileName
         array_key_exists(
-            'fileName',
+            'filename',
             $options
-        ) ? $this->fileName = $options['fileName'] . '.' . $this->format : $this->fileName = 'Data export' . '.' . $this->format;
+        ) ? $this->fileName = $options['filename'] . '.' . $this->format : $this->fileName = 'Data export' . '.' . $this->format;
+        //memory option
+        in_array(
+            'memory',
+            $options
+        ) ? $this->memory = true : false;
     }
 
     public function openXML()
@@ -262,6 +272,10 @@ class DataExporter
                 $response->headers->set('Content-Type', 'text/xml');
                 $response->setContent($this->data);
                 break;
+        }
+
+        if ($this->memory) {
+            return $response->getContent();
         }
 
         $response->headers->set('Cache-Control', 'public');
