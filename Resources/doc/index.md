@@ -37,6 +37,13 @@ With object:
 col1 is equals with $object->getCol1(), hasCol1(), isCol1(), $object->col1 or magic method __get('col1')
 ```
 
+### Render to memory
+Maybe sometime you a need render data to variable.
+EEDataExporter support this. You must set parameter `memory` into setOption eg.
+```php
+$exporter->setOptions('csv', array('fileName' => 'file', 'separator' => ';', 'memory'));
+```
+
 ### Usage example from array:
 
 ```php
