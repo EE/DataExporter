@@ -110,6 +110,54 @@ class DataExporterTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($result, $exporter->render()->getContent());
     }
 
+    public function testJSONMemoryEscapeExport()
+    {
+        $exporter = new DataExporter();
+        $exporter->setOptions('json', array('memory'));
+        $exporter->setColumns(array('[col1]', '[col2]', '[col3]'));
+        $exporter->setData(array(
+                array('col1' => '1a', 'col2' => '1b', 'col3' => '1c'),
+                array('col1' => '2a', 'col2' => '2b'),
+            ));
+
+        $result = '{"1":{"[col1]":"1a","[col2]":"1b","[col3]":"1c"},"2":{"[col1]":"2a","[col2]":"2b","[col3]":""}}';
+
+        $this->assertEquals($result, $exporter->render());
+    }
+
+
+    public function testHookExport()
+    {
+        $exporter = new DataExporter();
+        $exporter->setOptions('json', array('fileName' => 'file'));
+        $exporter->setColumns(array('[col1]', '[col2]', '[col3]'));
+        $exporter->addHook(array('EE\DataExporterBundle\Test\Service\DataExporterTest', 'hookTest'), '[col1]');
+        $exporter->addHook(array('EE\DataExporterBundle\Test\Service\DataExporterTest', 'hookTest2'), '[col3]');
+        $exporter->setData(array(
+                array('col1' => '1a', 'col2' => '1b', 'col3' => '1c'),
+                array('col1' => '2a', 'col2' => '2b'),
+            ));
+
+        $result = '{"1":{"[col1]":"1aHooked","[col2]":"1b","[col3]":"1cHooked2"},"2":{"[col1]":"2aHooked","[col2]":"2b","[col3]":"Hooked2"}}';
+
+        $this->assertEquals($result, $exporter->render()->getContent());
+    }
+
+    public function hookTest($data)
+    {
+        return $data.'Hooked';
+    }
+
+    public function hookTest2($data)
+    {
+        return $data.'Hooked2';
+    }
+
+    public function hookTestArrayReturn($data)
+    {
+        return array($data);
+    }
+
     /**
      * @expectedException RuntimeException
      */
@@ -118,6 +166,52 @@ class DataExporterTest extends \PHPUnit_Framework_TestCase
         $exporter = new DataExporter();
         $exporter->setOptions('none');
     }
+
+    /**
+     * @expectedException LengthException
+     */
+    public function testHookNonParameter()
+    {
+        $exporter = new DataExporter();
+        $exporter->setOptions('json', array('fileName' => 'file'));
+        $exporter->setColumns(array('[col1]', '[col2]', '[col3]'));
+        $exporter->addHook(array('EE\DataExporterBundle\Test\Service\DataExporterTest'), '[col1]');
+    }
+
+    /**
+     * @expectedException InvalidArgumentException
+     */
+    public function testHookNonExistColumn()
+    {
+        $exporter = new DataExporter();
+        $exporter->setOptions('json', array('fileName' => 'file'));
+        $exporter->setColumns(array('[col1]', '[col2]', '[col3]'));
+        $exporter->addHook(array('EE\DataExporterBundle\Test\Service\DataExporterTest', 'hookTest'), '[colNonExist]');
+    }
+
+    /**
+     * @expectedException BadFunctionCallException
+     */
+    public function testHookNonFunctionExist()
+    {
+        $exporter = new DataExporter();
+        $exporter->setOptions('json', array('fileName' => 'file'));
+        $exporter->setColumns(array('[col1]', '[col2]', '[col3]'));
+        $exporter->addHook(array('EE\DataExporterBundle\Test\Service\DataExporterTest', 'hookTestNon'), '[col1]');
+    }
+
+    /**
+     * @expectedException UnexpectedValueException
+     */
+    public function testHookNoStringReturn()
+    {
+        $exporter = new DataExporter();
+        $exporter->setOptions('json', array('fileName' => 'file'));
+        $exporter->setColumns(array('[col1]', '[col2]', '[col3]'));
+        $exporter->addHook(array('EE\DataExporterBundle\Test\Service\DataExporterTest', 'hookTestArrayReturn'), '[col1]');
+    }
+
+
 
     /**
      * @expectedException RuntimeException
