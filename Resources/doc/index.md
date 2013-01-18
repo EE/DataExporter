@@ -44,6 +44,15 @@ EEDataExporter support this. You must set parameter `memory` into setOption eg.
 $exporter->setOptions('csv', array('fileName' => 'file', 'separator' => ';', 'memory'));
 ```
 
+### Hook a column
+Sometimes we may need customizing data before adding it to the document.
+Our exporter support this! Just use the function addHook.
+addHook expected two parameters. First is a function that we want use, second is a column name, eg.:
+```php
+$exporter->addHook(array('EE\DataExporterBundle\Test\Service\DataExporterTest', 'hookTest'), '[col1]');
+```
+It is possible to set multiple hooks on multiple columns, but only one for each of them.
+
 ### Usage example from array:
 
 ```php
