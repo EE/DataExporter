@@ -153,6 +153,11 @@ class DataExporterTest extends \PHPUnit_Framework_TestCase
         return $data.'Hooked2';
     }
 
+    public function hookTestArrayReturn($data)
+    {
+        return array($data);
+    }
+
     /**
      * @expectedException RuntimeException
      */
@@ -161,6 +166,52 @@ class DataExporterTest extends \PHPUnit_Framework_TestCase
         $exporter = new DataExporter();
         $exporter->setOptions('none');
     }
+
+    /**
+     * @expectedException LengthException
+     */
+    public function testHookNonParameter()
+    {
+        $exporter = new DataExporter();
+        $exporter->setOptions('json', array('fileName' => 'file'));
+        $exporter->setColumns(array('[col1]', '[col2]', '[col3]'));
+        $exporter->addHook(array('EE\DataExporterBundle\Test\Service\DataExporterTest'), '[col1]');
+    }
+
+    /**
+     * @expectedException InvalidArgumentException
+     */
+    public function testHookNonExistColumn()
+    {
+        $exporter = new DataExporter();
+        $exporter->setOptions('json', array('fileName' => 'file'));
+        $exporter->setColumns(array('[col1]', '[col2]', '[col3]'));
+        $exporter->addHook(array('EE\DataExporterBundle\Test\Service\DataExporterTest', 'hookTest'), '[colNonExist]');
+    }
+
+    /**
+     * @expectedException BadFunctionCallException
+     */
+    public function testHookNonFunctionExist()
+    {
+        $exporter = new DataExporter();
+        $exporter->setOptions('json', array('fileName' => 'file'));
+        $exporter->setColumns(array('[col1]', '[col2]', '[col3]'));
+        $exporter->addHook(array('EE\DataExporterBundle\Test\Service\DataExporterTest', 'hookTestNon'), '[col1]');
+    }
+
+    /**
+     * @expectedException UnexpectedValueException
+     */
+    public function testHookNoStringReturn()
+    {
+        $exporter = new DataExporter();
+        $exporter->setOptions('json', array('fileName' => 'file'));
+        $exporter->setColumns(array('[col1]', '[col2]', '[col3]'));
+        $exporter->addHook(array('EE\DataExporterBundle\Test\Service\DataExporterTest', 'hookTestArrayReturn'), '[col1]');
+    }
+
+
 
     /**
      * @expectedException RuntimeException
