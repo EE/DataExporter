@@ -28,11 +28,11 @@ class DataExporter
      */
     public function setOptions($format, $options = array())
     {
-        if (!in_array($format, $this->supportedFormat)) {
+        if (!in_array(strtolower($format), $this->supportedFormat)) {
             throw new \RuntimeException( sprintf('The format %s is not supported', $format) );
         }
 
-        $this->format = $format;
+        $this->format = strtolower($format);
 
         if ('csv' === $format) {
             //options for csv
@@ -55,10 +55,13 @@ class DataExporter
         $options = array_map('strtolower', $options);
 
         //fileName
-        array_key_exists(
-            'filename',
-            $options
-        ) ? $this->fileName = $options['filename'] . '.' . $this->format : $this->fileName = 'Data export' . '.' . $this->format;
+        if (array_key_exists('filename',$options)) {
+            $this->fileName = $options['filename'] . '.' . $this->format;
+            unset($options['filename']);
+        }
+        else {
+            $this->fileName = 'Data export' . '.' . $this->format;
+        }
         //memory option
         in_array(
             'memory',
