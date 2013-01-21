@@ -132,7 +132,7 @@ class DataExporterTest extends \PHPUnit_Framework_TestCase
         $exporter->setOptions('json', array('fileName' => 'file'));
         $exporter->setColumns(array('[col1]', '[col2]', '[col3]'));
         $exporter->addHook(array('EE\DataExporterBundle\Test\Service\DataExporterTest', 'hookTest'), '[col1]');
-        $exporter->addHook(array('EE\DataExporterBundle\Test\Service\DataExporterTest', 'hookTest2'), '[col3]');
+        $exporter->addHook(array(&$this, 'hookTest2'), '[col3]');
         $exporter->setData(array(
                 array('col1' => '1a', 'col2' => '1b', 'col3' => '1c'),
                 array('col1' => '2a', 'col2' => '2b'),
