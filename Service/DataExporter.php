@@ -110,7 +110,12 @@ class DataExporter
 
         //check for hook
         if (array_key_exists($column, $hooks)) {
-            $obj = new $hooks[$column][0];
+            if (is_object($hooks[$column][0])) {
+                $obj = $hooks[$column][0];
+            }
+            else {
+                $obj = new $hooks[$column][0];
+            }
             $data = $obj->$hooks[$column][1]($data);
         }
 
