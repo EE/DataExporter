@@ -102,12 +102,6 @@ class DataExporter
 
     public static function escape($data, $separator, $escape, $column, $hooks)
     {
-        $data = mb_ereg_replace(
-            sprintf('(%s)', $separator),
-            sprintf('%s\1', $escape),
-            $data
-        );
-
         //check for hook
         if (array_key_exists($column, $hooks)) {
             if (is_object($hooks[$column][0])) {
@@ -118,6 +112,15 @@ class DataExporter
             }
             $data = $obj->$hooks[$column][1]($data);
         }
+
+        //replace new line character
+        $data = preg_replace("/\r\n|\r|\n/", ' ', $data);
+
+        $data = mb_ereg_replace(
+            sprintf('(%s)', $separator),
+            sprintf('%s\1', $escape),
+            $data
+        );
 
         return $data;
     }
