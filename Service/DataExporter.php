@@ -113,6 +113,9 @@ class DataExporter
             $data = $obj->$hooks[$column][1]($data);
         }
 
+        //replace new line character
+        $data = preg_replace("/\r\n|\r|\n/", ' ', $data);
+
         $data = mb_ereg_replace(
             sprintf('(%s)', $separator),
             sprintf('%s\1', $escape),
