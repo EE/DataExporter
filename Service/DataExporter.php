@@ -137,11 +137,6 @@ class DataExporter
         if (false === is_array($function) ) {
             $f = new \ReflectionFunction($function);
             if ($f->isClosure()) {
-                $result = $function('test');
-                if (!is_string($result)) {
-                    throw new \UnexpectedValueException( sprintf("Function %s in class %s not return a string! \nReturn: ".gettype($result), $function) );
-                }
-
                 $this->hooks[$column] = $function;
                 return true;
             }
@@ -157,18 +152,6 @@ class DataExporter
 
             if (!is_callable($function)) {
                 throw new \BadFunctionCallException( sprintf('Function %s in class %s non exist!', $function[1], $function[0]) );
-            }
-
-            if (is_object($function[0])) {
-                $result = $function[0]->$function[1]('test');
-            }
-            else {
-                $object = new $function[0];
-                $result = $object->$function[1]('test');
-            }
-
-            if (!is_string($result)) {
-                throw new \UnexpectedValueException( sprintf("Function %s in class %s not return a string! \nReturn: ".gettype($result), $function[1], $function[0]) );
             }
 
             $this->hooks[$column] = array($function[0], $function[1]);
