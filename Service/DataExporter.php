@@ -123,8 +123,8 @@ class DataExporter
         $data = preg_replace("/\r\n|\r|\n/", ' ', $data);
 
         $data = mb_ereg_replace(
-            sprintf('(%s)', $separator),
-            sprintf('%s\1', $escape),
+            sprintf('%s', $separator),
+            sprintf('%s', $escape),
             $data
         );
 
