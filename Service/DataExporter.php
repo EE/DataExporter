@@ -104,54 +104,59 @@ class DataExporter
     {
         //check for hook
         if (array_key_exists($column, $hooks)) {
-            if (is_object($hooks[$column][0])) {
-                $obj = $hooks[$column][0];
+            //check for closure
+            if (false === is_array($hooks[$column]) ) {
+                $data = $hooks[$column]($data);
             }
             else {
-                $obj = new $hooks[$column][0];
+                if (is_object($hooks[$column][0])) {
+                    $obj = $hooks[$column][0];
+                }
+                else {
+                    $obj = new $hooks[$column][0];
+                }
+                $data = $obj->$hooks[$column][1]($data);
             }
-            $data = $obj->$hooks[$column][1]($data);
         }
 
         //replace new line character
         $data = preg_replace("/\r\n|\r|\n/", ' ', $data);
 
         $data = mb_ereg_replace(
-            sprintf('(%s)', $separator),
-            sprintf('%s\1', $escape),
+            sprintf('%s', $separator),
+            sprintf('%s', $escape),
             $data
         );
 
         return $data;
     }
 
-    public function addHook(Array $function, $column)
+    public function addHook($function, $column)
     {
-        if (2 !== count($function)) {
-            throw new \LengthException('Exactly two parameters required!');
-        }
-
-        if (!in_array($column, $this->columns)) {
-            throw new \InvalidArgumentException( sprintf("Parameter column must be someone defined in setColumns function!\nRecived: %s\n Expected one of: %s", $function[1], implode(', ', $this->columns) ));
-        }
-
-        if (!is_callable($function)) {
-            throw new \BadFunctionCallException( sprintf('Function %s in class %s non exist!', $function[1], $function[0]) );
-        }
-
-        if (is_object($function[0])) {
-            $result = $function[0]->$function[1]('test');
+        //check for closure
+        if (false === is_array($function) ) {
+            $f = new \ReflectionFunction($function);
+            if ($f->isClosure()) {
+                $this->hooks[$column] = $function;
+                return true;
+            }
         }
         else {
-            $object = new $function[0];
-            $result = $object->$function[1]('test');
+            if (2 !== count($function)) {
+                throw new \LengthException('Exactly two parameters required!');
+            }
+
+            if (!in_array($column, $this->columns)) {
+                throw new \InvalidArgumentException( sprintf("Parameter column must be someone defined in setColumns function!\nRecived: %s\n Expected one of: %s", $function[1], implode(', ', $this->columns) ));
+            }
+
+            if (!is_callable($function)) {
+                throw new \BadFunctionCallException( sprintf('Function %s in class %s non exist!', $function[1], $function[0]) );
+            }
+
+            $this->hooks[$column] = array($function[0], $function[1]);
         }
 
-        if (!is_string($result)) {
-            throw new \UnexpectedValueException( sprintf("Function %s in class %s not return a string! \nReturn: ".gettype($result), $function[1], $function[0]) );
-        }
-
-        $this->hooks[$column] = array($function[0], $function[1]);
     }
 
     /**

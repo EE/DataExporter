@@ -143,6 +143,29 @@ class DataExporterTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($result, $exporter->render()->getContent());
     }
 
+    public function testHookClosureExport()
+    {
+        $exporter = new DataExporter();
+        $exporter->setOptions('json', array('fileName' => 'file'));
+        $exporter->setColumns(array('[col1]', '[col2]', '[col3]'));
+
+        $f = function($parm){
+            return $parm.'Hooked2';
+        };
+
+        $exporter->addHook(array(&$this, 'hookTest'), '[col1]');
+        $exporter->addHook($f, '[col3]');
+
+        $exporter->setData(array(
+                array('col1' => '1a', 'col2' => '1b', 'col3' => '1c'),
+                array('col1' => '2a', 'col2' => '2b'),
+            ));
+
+        $result = '{"1":{"[col1]":"1aHooked","[col2]":"1b","[col3]":"1cHooked2"},"2":{"[col1]":"2aHooked","[col2]":"2b","[col3]":"Hooked2"}}';
+
+        $this->assertEquals($result, $exporter->render()->getContent());
+    }
+
     public function hookTest($data)
     {
         return $data.'Hooked';
@@ -151,11 +174,6 @@ class DataExporterTest extends \PHPUnit_Framework_TestCase
     public function hookTest2($data)
     {
         return $data.'Hooked2';
-    }
-
-    public function hookTestArrayReturn($data)
-    {
-        return array($data);
     }
 
     /**
@@ -199,19 +217,6 @@ class DataExporterTest extends \PHPUnit_Framework_TestCase
         $exporter->setColumns(array('[col1]', '[col2]', '[col3]'));
         $exporter->addHook(array('EE\DataExporterBundle\Test\Service\DataExporterTest', 'hookTestNon'), '[col1]');
     }
-
-    /**
-     * @expectedException UnexpectedValueException
-     */
-    public function testHookNoStringReturn()
-    {
-        $exporter = new DataExporter();
-        $exporter->setOptions('json', array('fileName' => 'file'));
-        $exporter->setColumns(array('[col1]', '[col2]', '[col3]'));
-        $exporter->addHook(array('EE\DataExporterBundle\Test\Service\DataExporterTest', 'hookTestArrayReturn'), '[col1]');
-    }
-
-
 
     /**
      * @expectedException RuntimeException
