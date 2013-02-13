@@ -47,11 +47,26 @@ $exporter->setOptions('csv', array('fileName' => 'file', 'separator' => ';', 'me
 ### Hook a column
 Sometimes we may need customizing data before adding it to the document.
 Our exporter support this! Just use the function addHook.
-addHook expected two parameters. First is a function (object) that we want use, second is a column name, eg.:
+addHook expected two or one parameters.
+ - first parameter is a function (object) that we want use, second is a column name, eg.:
 ```php
 $exporter->addHook(array('EE\DataExporterBundle\Test\Service\DataExporterTest', 'hookTest'), '[col1]');
 $exporter->addHook(array(&$this, 'hookTest2'), '[col3]');
 ```
+- EEDataExporter support closure as parameter eg.:
+```php
+$f = function($parm){
+        if ($parm instance of \DateTime
+            return $parm->format('Y-m-d');
+        else return '';
+    };
+
+    $exporter->addHook($f, '[colName]');
+```
+```php
+    $exporter->addHook(function($p){return ucfirst($p);}, '[colName]');
+```
+
 It is possible to set multiple hooks on multiple columns, but only one for each of them.
 
 ### Usage example from array:
