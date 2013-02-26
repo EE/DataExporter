@@ -64,7 +64,6 @@ $f = function($parm){
 
     $exporter->addHook($f, '[colName]');
 ```
-
 ```php
     $exporter->addHook(function($p){return ucfirst($p);}, '[colName]');
 ```
