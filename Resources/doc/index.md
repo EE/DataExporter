@@ -53,7 +53,8 @@ addHook expected two or one parameters.
 $exporter->addHook(array('EE\DataExporterBundle\Test\Service\DataExporterTest', 'hookTest'), '[col1]');
 $exporter->addHook(array(&$this, 'hookTest2'), '[col3]');
 ```
-- EEDataExporter support closure as parameter eg.:
+
+ - EEDataExporter support closure as parameter eg.:
 ```php
 $f = function($parm){
         if ($parm instance of \DateTime
@@ -63,6 +64,7 @@ $f = function($parm){
 
     $exporter->addHook($f, '[colName]');
 ```
+
 ```php
     $exporter->addHook(function($p){return ucfirst($p);}, '[colName]');
 ```
