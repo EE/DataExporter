@@ -1,6 +1,6 @@
 EEDataExporter
 -------------
-[![Build Status](https://api.travis-ci.org/Antek88/DataExporter.png?branch=master)](http://travis-ci.org/Antek88/DataExporter)
+[![Build Status](https://api.travis-ci.org/EE/DataExporter.png?branch=master)](http://travis-ci.org/EE/DataExporter)
 
 Easy export data to CSV, XML, JSON, Excel, HTML file or into memory.
 
