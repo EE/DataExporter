@@ -18,6 +18,7 @@ class DataExporter
     protected $escape;
     protected $fileName;
     protected $memory;
+    protected $skipHeader;
     protected $supportedFormat = array( 'csv', 'xls', 'html', 'xml', 'json' );
     protected $hooks = array();
 
@@ -35,18 +36,18 @@ class DataExporter
 
         $this->format = strtolower($format);
 
-        if ('csv' === $format) {
+        if ('csv' === $this->format) {
             //options for csv
             array_key_exists('separator', $options) ? $this->separator = $options['separator'] : $this->separator = ',';
             array_key_exists('escape', $options) ? $this->escape = $options['escape'] : '\\';
             $this->data = array();
-        } elseif ('xls' === $format) {
+        } elseif ('xls' === $this->format) {
             //options for xls
             $this->openXLS();
-        } elseif ('html' === $format) {
+        } elseif ('html' === $this->format) {
             //options for html
             $this->openHTML();
-        } elseif ('xml' === $format) {
+        } elseif ('xml' === $this->format) {
             //options for xml
             $this->openXML();
         }
@@ -68,6 +69,16 @@ class DataExporter
             'memory',
             $options
         ) ? $this->memory = true : false;
+
+        //skip header
+        in_array(
+            'skip_header',
+            $options
+        ) ? $this->skipHeader = true : false;
+
+        if($this->skipHeader && !($this->format === 'csv')) {
+            throw new \RuntimeException( sprintf('The format %s not support skip_header option !', $format) );
+        }
     }
 
     public function openXML()
@@ -243,7 +254,7 @@ class DataExporter
                 $this->columns[] = $key;
             }
 
-            if ('csv' === $this->format) {
+            if ('csv' === $this->format && !$this->skipHeader) {
 
                 //last item
                 if (isset( $this->data[0] )) {
