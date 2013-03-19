@@ -166,6 +166,30 @@ class DataExporterTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($result, $exporter->render()->getContent());
     }
 
+    public function testCSVExportSkipHeader()
+    {
+        $exporter = new DataExporter();
+        $exporter->setOptions('csv', array('fileName' => 'file', 'separator' => ';', 'skip_header'));
+        $exporter->setColumns(array('[col1]', '[col2]', '[col3]'));
+        $exporter->setData(array(
+            array('col1' => '1a', 'col2' => '1b', 'col3' => '1c'),
+            array('col1' => '2a', 'col2' => '2b'),
+        ));
+
+        $result = "1a;1b;1c\n2a;2b;";
+
+        $this->assertEquals($result, $exporter->render()->getContent());
+    }
+
+    /**
+     * @expectedException RuntimeException
+     */
+    public function testExportSkipHeaderException()
+    {
+        $exporter = new DataExporter();
+        $exporter->setOptions('html', array('fileName' => 'file', 'separator' => ';', 'skip_header'));
+    }
+
     public function hookTest($data)
     {
         return $data.'Hooked';
