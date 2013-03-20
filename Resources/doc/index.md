@@ -39,9 +39,17 @@ col1 is equals with $object->getCol1(), hasCol1(), isCol1(), $object->col1 or ma
 
 ### Render to memory
 Maybe sometime you a need render data to variable.
-EEDataExporter support this. You must set parameter `memory` into setOption eg.
+EEDataExporter support this. You must set parameter `memory` into setOption eg.:
 ```php
 $exporter->setOptions('csv', array('fileName' => 'file', 'separator' => ';', 'memory'));
+//set data...
+$var = $exporter->render();
+```
+
+### Skip header in CSV format
+If you want skip columns name in CSV format use flag skip_header in setOptions eg.:
+```php
+$exporter->setOptions('csv', array('fileName' => 'file', 'separator' => ';', 'memory', 'skip_header'));
 ```
 
 ### Hook a column

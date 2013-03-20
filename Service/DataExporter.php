@@ -19,7 +19,7 @@ class DataExporter
     protected $fileName;
     protected $memory;
     protected $skipHeader;
-    protected $supportedFormat = array( 'csv', 'xls', 'html', 'xml', 'json' );
+    protected $supportedFormat = array('csv', 'xls', 'html', 'xml', 'json');
     protected $hooks = array();
 
     /**
@@ -31,7 +31,7 @@ class DataExporter
     public function setOptions($format, $options = array())
     {
         if (!in_array(strtolower($format), $this->supportedFormat)) {
-            throw new \RuntimeException( sprintf('The format %s is not supported', $format) );
+            throw new \RuntimeException(sprintf('The format %s is not supported', $format));
         }
 
         $this->format = strtolower($format);
@@ -57,11 +57,10 @@ class DataExporter
         $options = array_map('strtolower', $options);
 
         //fileName
-        if (array_key_exists('filename',$options)) {
+        if (array_key_exists('filename', $options)) {
             $this->fileName = $options['filename'] . '.' . $this->format;
             unset($options['filename']);
-        }
-        else {
+        } else {
             $this->fileName = 'Data export' . '.' . $this->format;
         }
         //memory option
@@ -76,8 +75,8 @@ class DataExporter
             $options
         ) ? $this->skipHeader = true : false;
 
-        if($this->skipHeader && !($this->format === 'csv')) {
-            throw new \RuntimeException( sprintf('The format %s not support skip_header option !', $format) );
+        if ($this->skipHeader && !($this->format === 'csv')) {
+            throw new \RuntimeException('Only CSV support skip_header option!');
         }
     }
 
@@ -116,14 +115,12 @@ class DataExporter
         //check for hook
         if (array_key_exists($column, $hooks)) {
             //check for closure
-            if (false === is_array($hooks[$column]) ) {
+            if (false === is_array($hooks[$column])) {
                 $data = $hooks[$column]($data);
-            }
-            else {
+            } else {
                 if (is_object($hooks[$column][0])) {
                     $obj = $hooks[$column][0];
-                }
-                else {
+                } else {
                     $obj = new $hooks[$column][0];
                 }
                 $data = $obj->$hooks[$column][1]($data);
@@ -145,24 +142,23 @@ class DataExporter
     public function addHook($function, $column)
     {
         //check for closure
-        if (false === is_array($function) ) {
+        if (false === is_array($function)) {
             $f = new \ReflectionFunction($function);
             if ($f->isClosure()) {
                 $this->hooks[$column] = $function;
                 return true;
             }
-        }
-        else {
+        } else {
             if (2 !== count($function)) {
                 throw new \LengthException('Exactly two parameters required!');
             }
 
             if (!in_array($column, $this->columns)) {
-                throw new \InvalidArgumentException( sprintf("Parameter column must be someone defined in setColumns function!\nRecived: %s\n Expected one of: %s", $function[1], implode(', ', $this->columns) ));
+                throw new \InvalidArgumentException(sprintf("Parameter column must be someone defined in setColumns function!\nRecived: %s\n Expected one of: %s", $function[1], implode(', ', $this->columns)));
             }
 
             if (!is_callable($function)) {
-                throw new \BadFunctionCallException( sprintf('Function %s in class %s non exist!', $function[1], $function[0]) );
+                throw new \BadFunctionCallException(sprintf('Function %s in class %s non exist!', $function[1], $function[0]));
             }
 
             $this->hooks[$column] = array($function[0], $function[1]);
@@ -175,17 +171,17 @@ class DataExporter
      */
     public function setData($rows)
     {
-        if (empty( $this->format )) {
+        if (empty($this->format)) {
             throw new \RuntimeException('First use setOptions!');
         }
-        if (empty( $this->columns )) {
+        if (empty($this->columns)) {
             throw new \RuntimeException('First use setColumns to set columns to export!');
         }
 
-        $accessor  = PropertyAccess::getPropertyAccessor();
+        $accessor = PropertyAccess::getPropertyAccessor();
         $separator = $this->separator;
-        $escape    = $this->escape;
-        $hooks     = $this->hooks;
+        $escape = $this->escape;
+        $hooks = $this->hooks;
 
         foreach ($rows as $row) {
             switch ($this->format) {
@@ -243,8 +239,8 @@ class DataExporter
     public function setColumns(Array $columns)
     {
 
-        if (empty( $this->format )) {
-            throw new \RuntimeException( sprintf('First use setOptions!') );
+        if (empty($this->format)) {
+            throw new \RuntimeException(sprintf('First use setOptions!'));
         }
 
         foreach ($columns as $key => $column) {
@@ -257,7 +253,7 @@ class DataExporter
             if ('csv' === $this->format && !$this->skipHeader) {
 
                 //last item
-                if (isset( $this->data[0] )) {
+                if (isset($this->data[0])) {
                     //last item
                     end($columns);
                     if ($key != key($columns)) {
@@ -315,7 +311,7 @@ class DataExporter
             case 'json':
                 $response->headers->set('Content-Type', 'application/json');
                 //remove first row from data
-                unset( $this->data[0] );
+                unset($this->data[0]);
                 $response->setContent(json_encode($this->data));
                 break;
             case 'xls':
