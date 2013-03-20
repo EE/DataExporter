@@ -49,7 +49,7 @@ $var = $exporter->render();
 ### Skip header in CSV format
 If you want skip columns name in CSV format use flag skip_header in setOptions eg.:
 ```php
-$exporter->setOptions('csv', array('fileName' => 'file', 'separator' => ';', 'memory', 'skip_header));
+$exporter->setOptions('csv', array('fileName' => 'file', 'separator' => ';', 'memory', 'skip_header'));
 ```
 
 ### Hook a column
