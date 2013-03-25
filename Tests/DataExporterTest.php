@@ -90,9 +90,15 @@ class DataExporterTest extends \PHPUnit_Framework_TestCase
                 array('col1' => '\'2a\'', 'col2' => '> & "2b"'),
             ));
 
-        $result = '<?xml version="1.0" encoding="UTF-8"?><table><row><column name="[col1]">&lt;test&gt;1a&lt;/test&gt;</column><column name="[col2]">"1b"</column><column name="[col3]">&lt; 1c</column></row><row><column name="[col1]">\'2a\'</column><column name="[col2]">&gt; &amp; "2b"</column><column name="[col3]"></column></row></table>';
+        $result_5_4 = '<?xml version="1.0" encoding="UTF-8"?><table><row><column name="[col1]">&lt;test&gt;1a&lt;/test&gt;</column><column name="[col2]">"1b"</column><column name="[col3]">&lt; 1c</column></row><row><column name="[col1]">\'2a\'</column><column name="[col2]">&gt; &amp; "2b"</column><column name="[col3]"></column></row></table>';
+        $result = '<?xml version="1.0" encoding="UTF-8"?><table><row><column name="[col1]">&lt;test&gt;1a&lt;/test&gt;</column><column name="[col2]">&quot;1b&quot;</column><column name="[col3]">&lt; 1c</column></row><row><column name="[col1]">\'2a\'</column><column name="[col2]">&gt; &amp; &quot;2b&quot;</column><column name="[col3]"></column></row></table>';
 
-        $this->assertEquals($result, $exporter->render()->getContent());
+        if (version_compare(phpversion(), '5.4.0', '>=')) {
+            $this->assertEquals($result_5_4, $exporter->render()->getContent());
+        }
+        else {
+            $this->assertEquals($result, $exporter->render()->getContent());
+        }
     }
 
     public function testJSONExport()
