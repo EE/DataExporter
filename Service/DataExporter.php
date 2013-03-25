@@ -110,7 +110,7 @@ class DataExporter
         $this->data .= "</table></body></html>";
     }
 
-    public static function escape($data, $separator, $escape, $column, $hooks)
+    public static function escape($data, $separator, $escape, $column, $hooks, $format)
     {
         //check for hook
         if (array_key_exists($column, $hooks)) {
@@ -135,6 +135,17 @@ class DataExporter
             sprintf('%s', $escape),
             $data
         );
+
+        if ('xml' === $format) {
+            if (version_compare(phpversion(), '5.4.0', '>=')) {
+                $data = htmlspecialchars($data, ENT_XML1);
+            }
+            else {
+                $data = htmlspecialchars($data);
+            }
+        }
+
+
 
         return $data;
     }
@@ -182,6 +193,7 @@ class DataExporter
         $separator = $this->separator;
         $escape = $this->escape;
         $hooks = $this->hooks;
+        $format = $this->format;
 
         foreach ($rows as $row) {
             switch ($this->format) {
@@ -197,8 +209,8 @@ class DataExporter
             }
 
             $tempRow = array_map(
-                function ($column) use ($row, $accessor, $separator, $escape, $hooks) {
-                    return DataExporter::escape($accessor->getValue($row, $column), $separator, $escape, $column, $hooks);
+                function ($column) use ($row, $accessor, $separator, $escape, $hooks, $format) {
+                    return DataExporter::escape($accessor->getValue($row, $column), $separator, $escape, $column, $hooks, $format);
                 },
                 $this->columns
             );
