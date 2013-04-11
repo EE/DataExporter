@@ -341,7 +341,7 @@ class DataExporter
             case 'xml':
                 //close tags
                 $this->closeXML();
-                $response->headers->set('Content-Type', 'text/xml');
+                $response->headers->set('Content-Type', 'application/xml');
                 $response->setContent($this->data);
                 break;
         }
