@@ -1,4 +1,7 @@
+parameters:
+    ee.dataexporter.class: EE\DataExporterBundle\Service\DataExporter
+
 services:
     ee.dataexporter:
-        class: EE\DataExporterBundle\Service\DataExporter
+        class: %ee.dataexporter.class%
         public: true

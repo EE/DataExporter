@@ -86,13 +86,19 @@ class DataExporterTest extends \PHPUnit_Framework_TestCase
         $exporter->setOptions('xml', array('fileName' => 'file'));
         $exporter->setColumns(array('[col1]', '[col2]', '[col3]'));
         $exporter->setData(array(
-                array('col1' => '1a', 'col2' => '1b', 'col3' => '1c'),
-                array('col1' => '2a', 'col2' => '2b'),
+                array('col1' => '<test>1a</test>', 'col2' => '"1b"', 'col3' => '< 1c'),
+                array('col1' => '\'2a\'', 'col2' => '> & "2b"'),
             ));
 
-        $result = '<?xml version="1.0" encoding="UTF-8"?><table><row><column name="[col1]">1a</column><column name="[col2]">1b</column><column name="[col3]">1c</column></row><row><column name="[col1]">2a</column><column name="[col2]">2b</column><column name="[col3]"></column></row></table>';
+        $result_5_4 = '<?xml version="1.0" encoding="UTF-8"?><table><row><column name="[col1]">&lt;test&gt;1a&lt;/test&gt;</column><column name="[col2]">"1b"</column><column name="[col3]">&lt; 1c</column></row><row><column name="[col1]">\'2a\'</column><column name="[col2]">&gt; &amp; "2b"</column><column name="[col3]"></column></row></table>';
+        $result = '<?xml version="1.0" encoding="UTF-8"?><table><row><column name="[col1]">&lt;test&gt;1a&lt;/test&gt;</column><column name="[col2]">&quot;1b&quot;</column><column name="[col3]">&lt; 1c</column></row><row><column name="[col1]">\'2a\'</column><column name="[col2]">&gt; &amp; &quot;2b&quot;</column><column name="[col3]"></column></row></table>';
 
-        $this->assertEquals($result, $exporter->render()->getContent());
+        if (version_compare(phpversion(), '5.4.0', '>=')) {
+            $this->assertEquals($result_5_4, $exporter->render()->getContent());
+        }
+        else {
+            $this->assertEquals($result, $exporter->render()->getContent());
+        }
     }
 
     public function testJSONExport()
