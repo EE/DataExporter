@@ -65,9 +65,12 @@ $exporter->addHook(array(&$this, 'hookTest2'), '[col3]');
  - EEDataExporter support closure as parameter eg.:
 ```php
 $f = function($parm){
-        if ($parm instance of \DateTime
+        if ($parm instanceof \DateTime) {
             return $parm->format('Y-m-d');
-        else return '';
+        }
+        else {
+            return '';
+        }
     };
 
     $exporter->addHook($f, '[colName]');
