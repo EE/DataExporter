@@ -11,21 +11,51 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
  */
 class DataExporter
 {
+    /**
+     * @var array
+     */
     protected $columns;
+    /**
+     * @var array
+     */
     protected $data;
+    /**
+     * @var string
+     */
     protected $format;
+    /**
+     * @var string
+     */
     protected $separator;
+    /**
+     * @var string
+     */
     protected $escape;
+    /**
+     * @var string
+     */
     protected $fileName;
+    /**
+     * @var boolean
+     */
     protected $memory;
+    /**
+     * @var boolean
+     */
     protected $skipHeader;
+    /**
+     * @var array
+     */
     protected $supportedFormat = array('csv', 'xls', 'html', 'xml', 'json');
+    /**
+     * @var array
+     */
     protected $hooks = array();
 
     /**
-     * @param       $format
+     * @param $format
      * @param array $options
-     *
+     * @return $this
      * @throws \RuntimeException
      */
     public function setOptions($format, $options = array())
@@ -78,38 +108,73 @@ class DataExporter
         if ($this->skipHeader && !($this->format === 'csv')) {
             throw new \RuntimeException('Only CSV support skip_header option!');
         }
+
+        return $this;
     }
 
+    /**
+     * @return $this
+     */
     public function openXML()
     {
         $this->data = '<?xml version="1.0" encoding="UTF-8"?><table>';
+        return $this;
     }
 
+    /**
+     * @return $this
+     */
     public function closeXML()
     {
         $this->data .= "</table>";
+        return $this;
     }
 
+    /**
+     * @return $this
+     */
     public function openXLS()
     {
         $this->data = "<!DOCTYPE ><html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" /><meta name=\"ProgId\" content=\"Excel.Sheet\"><meta name=\"Generator\" content=\"https://github.com/EE/DataExporter\"></head><body><table>";
+        return $this;
     }
 
+    /**
+     * @return $this
+     */
     public function closeXLS()
     {
         $this->data .= "</table></body></html>";
+        return $this;
     }
 
+    /**
+     * @return $this
+     */
     public function openHTML()
     {
         $this->data = "<!DOCTYPE ><html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" /><meta name=\"Generator\" content=\"https://github.com/EE/DataExporter\"></head><body><table>";
+        return $this;
     }
 
+    /**
+     * @return $this
+     */
     public function closeHTML()
     {
         $this->data .= "</table></body></html>";
+        return $this;
     }
 
+    /**
+     * @param $data
+     * @param $separator
+     * @param $escape
+     * @param $column
+     * @param $hooks
+     * @param $format
+     * @return string
+     */
     public static function escape($data, $separator, $escape, $column, $hooks, $format)
     {
         //check for hook
@@ -150,6 +215,14 @@ class DataExporter
         return $data;
     }
 
+    /**
+     * @param $function
+     * @param $column
+     * @return $this|bool
+     * @throws \BadFunctionCallException
+     * @throws \InvalidArgumentException
+     * @throws \LengthException
+     */
     public function addHook($function, $column)
     {
         //check for closure
@@ -175,10 +248,13 @@ class DataExporter
             $this->hooks[$column] = array($function[0], $function[1]);
         }
 
+        return $this;
     }
 
     /**
      * @param $rows
+     * @return $this
+     * @throws \RuntimeException
      */
     public function setData($rows)
     {
@@ -243,10 +319,13 @@ class DataExporter
 
         }
 
+        return $this;
     }
 
     /**
      * @param array $columns
+     * @return $this
+     * @throws \RuntimeException
      */
     public function setColumns(Array $columns)
     {
@@ -294,6 +373,7 @@ class DataExporter
             }
         }
 
+        return $this;
     }
 
 
