@@ -44,6 +44,10 @@ class DataExporter
      */
     protected $skipHeader;
     /**
+     * @var string
+     */
+    protected $charset;
+    /**
      * @var array
      */
     protected $supportedFormat = array('csv', 'xls', 'html', 'xml', 'json');
@@ -65,6 +69,8 @@ class DataExporter
         }
 
         $this->format = strtolower($format);
+
+        $this->charset = isset($options['charset']) ? $options['charset'] : 'utf-8';
 
         if ('csv' === $this->format) {
             //options for csv
@@ -117,7 +123,7 @@ class DataExporter
      */
     public function openXML()
     {
-        $this->data = '<?xml version="1.0" encoding="UTF-8"?><table>';
+        $this->data = '<?xml version="1.0" encoding="' . $this->charset . '"?><table>';
         return $this;
     }
 
@@ -135,7 +141,7 @@ class DataExporter
      */
     public function openXLS()
     {
-        $this->data = "<!DOCTYPE ><html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" /><meta name=\"ProgId\" content=\"Excel.Sheet\"><meta name=\"Generator\" content=\"https://github.com/EE/DataExporter\"></head><body><table>";
+        $this->data = "<!DOCTYPE ><html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=" . $this->charset . "\" /><meta name=\"ProgId\" content=\"Excel.Sheet\"><meta name=\"Generator\" content=\"https://github.com/EE/DataExporter\"></head><body><table>";
         return $this;
     }
 
@@ -153,7 +159,7 @@ class DataExporter
      */
     public function openHTML()
     {
-        $this->data = "<!DOCTYPE ><html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" /><meta name=\"Generator\" content=\"https://github.com/EE/DataExporter\"></head><body><table>";
+        $this->data = "<!DOCTYPE ><html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=" . $this->charset . "\" /><meta name=\"Generator\" content=\"https://github.com/EE/DataExporter\"></head><body><table>";
         return $this;
     }
 
