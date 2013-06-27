@@ -20,6 +20,4 @@ class TestObject2
     {
         return $this->col1;
     }
-
 }
-

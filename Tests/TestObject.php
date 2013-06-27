@@ -46,6 +46,4 @@ class TestObject
     {
         return $this->col3;
     }
-
 }
-
