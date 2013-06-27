@@ -7,7 +7,7 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 
 /**
  * @author  Piotr Antosik <mail@piotrantosik.com>
- * @version 0.4
+ * @version 0.4.2
  */
 class DataExporter
 {
@@ -124,6 +124,7 @@ class DataExporter
     public function openXML()
     {
         $this->data = '<?xml version="1.0" encoding="' . $this->charset . '"?><table>';
+
         return $this;
     }
 
@@ -133,6 +134,7 @@ class DataExporter
     public function closeXML()
     {
         $this->data .= "</table>";
+
         return $this;
     }
 
@@ -142,6 +144,7 @@ class DataExporter
     public function openXLS()
     {
         $this->data = "<!DOCTYPE ><html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=" . $this->charset . "\" /><meta name=\"ProgId\" content=\"Excel.Sheet\"><meta name=\"Generator\" content=\"https://github.com/EE/DataExporter\"></head><body><table>";
+
         return $this;
     }
 
@@ -151,6 +154,7 @@ class DataExporter
     public function closeXLS()
     {
         $this->data .= "</table></body></html>";
+
         return $this;
     }
 
@@ -160,6 +164,7 @@ class DataExporter
     public function openHTML()
     {
         $this->data = "<!DOCTYPE ><html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=" . $this->charset . "\" /><meta name=\"Generator\" content=\"https://github.com/EE/DataExporter\"></head><body><table>";
+
         return $this;
     }
 
@@ -169,6 +174,7 @@ class DataExporter
     public function closeHTML()
     {
         $this->data .= "</table></body></html>";
+
         return $this;
     }
 
@@ -210,12 +216,10 @@ class DataExporter
         if ('xml' === $format) {
             if (version_compare(phpversion(), '5.4.0', '>=')) {
                 $data = htmlspecialchars($data, ENT_XML1);
-            }
-            else {
+            } else {
                 $data = htmlspecialchars($data);
             }
         }
-
 
 
         return $data;
@@ -236,6 +240,7 @@ class DataExporter
             $f = new \ReflectionFunction($function);
             if ($f->isClosure()) {
                 $this->hooks[$column] = $function;
+
                 return true;
             }
         } else {
@@ -244,11 +249,19 @@ class DataExporter
             }
 
             if (!in_array($column, $this->columns)) {
-                throw new \InvalidArgumentException(sprintf("Parameter column must be someone defined in setColumns function!\nRecived: %s\n Expected one of: %s", $function[1], implode(', ', $this->columns)));
+                throw new \InvalidArgumentException(sprintf(
+                    "Parameter column must be someone defined in setColumns function!\nRecived: %s\n Expected one of: %s",
+                    $function[1],
+                    implode(', ', $this->columns)
+                ));
             }
 
             if (!is_callable($function)) {
-                throw new \BadFunctionCallException(sprintf('Function %s in class %s non exist!', $function[1], $function[0]));
+                throw new \BadFunctionCallException(sprintf(
+                    'Function %s in class %s non exist!',
+                    $function[1],
+                    $function[0]
+                ));
             }
 
             $this->hooks[$column] = array($function[0], $function[1]);
@@ -292,7 +305,14 @@ class DataExporter
 
             $tempRow = array_map(
                 function ($column) use ($row, $accessor, $separator, $escape, $hooks, $format) {
-                    return DataExporter::escape($accessor->getValue($row, $column), $separator, $escape, $column, $hooks, $format);
+                    return DataExporter::escape(
+                        $accessor->getValue($row, $column),
+                        $separator,
+                        $escape,
+                        $column,
+                        $hooks,
+                        $format
+                    );
                 },
                 $this->columns
             );
