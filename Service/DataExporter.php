@@ -6,8 +6,10 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
 /**
+ * DataExporter class
+ *
  * @author  Piotr Antosik <mail@piotrantosik.com>
- * @version 0.4.2
+ * @version Release: 0.4.2
  */
 class DataExporter
 {
@@ -15,103 +17,117 @@ class DataExporter
      * @var array
      */
     protected $columns;
+
     /**
      * @var array
      */
     protected $data;
+
     /**
      * @var string
      */
     protected $format;
+
     /**
      * @var string
      */
     protected $separator;
+
     /**
      * @var string
      */
     protected $escape;
+
     /**
      * @var string
      */
     protected $fileName;
+
     /**
      * @var boolean
      */
     protected $memory;
+
     /**
      * @var boolean
      */
     protected $skipHeader;
+
     /**
      * @var string
      */
     protected $charset;
+
     /**
      * @var array
      */
     protected $supportedFormat = array('csv', 'xls', 'html', 'xml', 'json');
+
     /**
      * @var array
      */
     protected $hooks = array();
 
     /**
-     * @param $format
-     * @param array $options
+     * @param string $format
+     * @param array  $options
+     *
      * @return $this
      * @throws \RuntimeException
      */
     public function setOptions($format, $options = array())
     {
-        if (!in_array(strtolower($format), $this->supportedFormat)) {
+        if (false === in_array(strtolower($format), $this->supportedFormat)) {
             throw new \RuntimeException(sprintf('The format %s is not supported', $format));
         }
 
         $this->format = strtolower($format);
-
         $this->charset = isset($options['charset']) ? $options['charset'] : 'utf-8';
 
-        if ('csv' === $this->format) {
-            //options for csv
-            array_key_exists('separator', $options) ? $this->separator = $options['separator'] : $this->separator = ',';
-            array_key_exists('escape', $options) ? $this->escape = $options['escape'] : '\\';
-            $this->data = array();
-        } elseif ('xls' === $this->format) {
-            //options for xls
-            $this->openXLS();
-        } elseif ('html' === $this->format) {
-            //options for html
-            $this->openHTML();
-        } elseif ('xml' === $this->format) {
-            //options for xml
-            $this->openXML();
+        switch ($this->format) {
+            case 'csv':
+                //options for csv
+                array_key_exists('separator', $options) ? $this->separator = $options['separator'] : $this->separator = ',';
+                array_key_exists('escape', $options) ? $this->escape = $options['escape'] : '\\';
+                $this->data = array();
+                break;
+            case 'xls':
+                $this->openXLS();
+                break;
+            case 'html':
+                $this->openHTML();
+                break;
+            case 'xml':
+                $this->openXML();
+                break;
         }
 
         //convert key and values to lowercase
-        $options = array_change_key_case($options, CASE_LOWER);
-        $options = array_map('strtolower', $options);
+        $options = array_map('strtolower', array_change_key_case($options, CASE_LOWER));
 
         //fileName
-        if (array_key_exists('filename', $options)) {
+        if (true === array_key_exists('filename', $options)) {
             $this->fileName = $options['filename'] . '.' . $this->format;
             unset($options['filename']);
         } else {
             $this->fileName = 'Data export' . '.' . $this->format;
         }
+
         //memory option
-        in_array(
-            'memory',
-            $options
-        ) ? $this->memory = true : false;
+        if (true === in_array('memory', $options)) {
+            $this->memory = true;
+        } else {
+            $this->memory = false;
+        }
 
         //skip header
-        in_array(
-            'skip_header',
-            $options
-        ) ? $this->skipHeader = true : false;
+        if (true === in_array('skip_header', $options)) {
+            $this->skipHeader = true;
+        } else {
+            $this->skipHeader = false;
+        }
 
-        if ($this->skipHeader && !($this->format === 'csv')) {
+        if (true === $this->skipHeader && !($this->format === 'csv')) {
             throw new \RuntimeException('Only CSV support skip_header option!');
         }
 
@@ -121,7 +137,7 @@ class DataExporter
     /**
      * @return $this
      */
-    public function openXML()
+    private function openXML()
     {
         $this->data = '<?xml version="1.0" encoding="' . $this->charset . '"?><table>';
 
@@ -131,7 +147,7 @@ class DataExporter
     /**
      * @return $this
      */
-    public function closeXML()
+    private function closeXML()
     {
         $this->data .= "</table>";
 
@@ -141,7 +157,7 @@ class DataExporter
     /**
      * @return $this
      */
-    public function openXLS()
+    private function openXLS()
     {
         $this->data = "<!DOCTYPE ><html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=" . $this->charset . "\" /><meta name=\"ProgId\" content=\"Excel.Sheet\"><meta name=\"Generator\" content=\"https://github.com/EE/DataExporter\"></head><body><table>";
 
@@ -151,7 +167,7 @@ class DataExporter
     /**
      * @return $this
      */
-    public function closeXLS()
+    private function closeXLS()
     {
         $this->data .= "</table></body></html>";
 
@@ -161,7 +177,7 @@ class DataExporter
     /**
      * @return $this
      */
-    public function openHTML()
+    private function openHTML()
     {
         $this->data = "<!DOCTYPE ><html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=" . $this->charset . "\" /><meta name=\"Generator\" content=\"https://github.com/EE/DataExporter\"></head><body><table>";
 
@@ -171,7 +187,7 @@ class DataExporter
     /**
      * @return $this
      */
-    public function closeHTML()
+    private function closeHTML()
     {
         $this->data .= "</table></body></html>";
 
@@ -179,12 +195,13 @@ class DataExporter
     }
 
     /**
-     * @param $data
-     * @param $separator
-     * @param $escape
-     * @param $column
-     * @param $hooks
-     * @param $format
+     * @param string $data
+     * @param string $separator
+     * @param string $escape
+     * @param string $column
+     * @param array  $hooks
+     * @param string $format
+     *
      * @return string
      */
     public static function escape($data, $separator, $escape, $column, $hooks, $format)
@@ -226,8 +243,9 @@ class DataExporter
     }
 
     /**
-     * @param $function
-     * @param $column
+     * @param array|\Closure  $function
+     * @param string          $column
+     *
      * @return $this|bool
      * @throws \BadFunctionCallException
      * @throws \InvalidArgumentException
@@ -237,8 +255,8 @@ class DataExporter
     {
         //check for closure
         if (false === is_array($function)) {
-            $f = new \ReflectionFunction($function);
-            if ($f->isClosure()) {
+            $functionReflected = new \ReflectionFunction($function);
+            if ($functionReflected->isClosure()) {
                 $this->hooks[$column] = $function;
 
                 return true;
@@ -248,17 +266,17 @@ class DataExporter
                 throw new \LengthException('Exactly two parameters required!');
             }
 
-            if (!in_array($column, $this->columns)) {
+            if (false === in_array($column, $this->columns)) {
                 throw new \InvalidArgumentException(sprintf(
-                    "Parameter column must be someone defined in setColumns function!\nRecived: %s\n Expected one of: %s",
+                    "Parameter column must be defined in setColumns function!\nRecived: %s\n Expected one of: %s",
                     $function[1],
                     implode(', ', $this->columns)
                 ));
             }
 
-            if (!is_callable($function)) {
+            if (false === is_callable($function)) {
                 throw new \BadFunctionCallException(sprintf(
-                    'Function %s in class %s non exist!',
+                    'Function %s in class %s is non callable!',
                     $function[1],
                     $function[0]
                 ));
@@ -271,7 +289,63 @@ class DataExporter
     }
 
     /**
-     * @param $rows
+     * @param string $row
+     *
+     * @return bool
+     */
+    private function addRow($row)
+    {
+        $separator = $this->separator;
+        $escape = $this->escape;
+        $hooks = $this->hooks;
+        $format = $this->format;
+
+        $tempRow = array_map(
+            function ($column) use ($row, $separator, $escape, $hooks, $format) {
+                return DataExporter::escape(
+                    PropertyAccess::createPropertyAccessor()->getValue($row, $column),
+                    $separator,
+                    $escape,
+                    $column,
+                    $hooks,
+                    $format
+                );
+            },
+            $this->columns
+        );
+
+        switch ($this->format) {
+            case 'csv':
+                $this->data[] = implode($this->separator, $tempRow);
+                break;
+            case 'json':
+                $this->data[] = array_combine($this->data[0], $tempRow);
+                break;
+            case 'xls':
+            case 'html':
+                $this->data .= '<tr>';
+                foreach ($tempRow as $val) {
+                    $this->data .= '<td>' . $val . '</td>';
+                }
+                $this->data .= '</tr>';
+                break;
+            case 'xml':
+                $this->data .= '<row>';
+                $index = 0;
+                foreach ($tempRow as $val) {
+                    $this->data .= '<column name="' . $this->columns[$index] . '">' . $val . '</column>';
+                    $index++;
+                }
+                $this->data .= '</row>';
+                break;
+        }
+
+        return true;
+    }
+
+    /**
+     * @param array $rows
+     *
      * @return $this
      * @throws \RuntimeException
      */
@@ -284,72 +358,81 @@ class DataExporter
             throw new \RuntimeException('First use setColumns to set columns to export!');
         }
 
-        $accessor = PropertyAccess::getPropertyAccessor();
-        $separator = $this->separator;
-        $escape = $this->escape;
-        $hooks = $this->hooks;
-        $format = $this->format;
-
         foreach ($rows as $row) {
-            switch ($this->format) {
-                case 'csv':
-                case 'json':
-                    $tempRow = array();
-                    break;
-                case 'xls':
-                case 'html':
-                case 'xml':
-                    $tempRow = '';
-                    break;
-            }
-
-            $tempRow = array_map(
-                function ($column) use ($row, $accessor, $separator, $escape, $hooks, $format) {
-                    return DataExporter::escape(
-                        $accessor->getValue($row, $column),
-                        $separator,
-                        $escape,
-                        $column,
-                        $hooks,
-                        $format
-                    );
-                },
-                $this->columns
-            );
-
-            switch ($this->format) {
-                case 'csv':
-                    $this->data[] = implode($this->separator, $tempRow);
-                    break;
-                case 'json':
-                    $this->data[] = array_combine($this->data[0], $tempRow);
-                    break;
-                case 'xls':
-                case 'html':
-                    $this->data .= '<tr>';
-                    foreach ($tempRow as $val) {
-                        $this->data .= '<td>' . $val . '</td>';
-                    }
-                    $this->data .= '</tr>';
-                    break;
-                case 'xml':
-                    $this->data .= '<row>';
-                    $i = 0;
-                    foreach ($tempRow as $val) {
-                        $this->data .= '<column name="' . $this->columns[$i] . '">' . $val . '</column>';
-                        $i++;
-                    }
-                    $this->data .= '</row>';
-                    break;
-            }
-
+            $this->addRow($row);
         }
 
         return $this;
     }
 
     /**
+     * @param array $haystack
+     *
+     * @return mixed
+     */
+    private function getLastKeyFromArray(Array $haystack)
+    {
+        end($haystack);
+
+        return key($haystack);
+    }
+
+    /**
+     * @param array $haystack
+     *
+     * @return mixed
+     */
+    private function getFirstKeyFromArray(Array $haystack)
+    {
+        reset($haystack);
+
+        return key($haystack);
+    }
+
+    /**
+     * @param string  $column
+     * @param integer $key
+     * @param array   $columns
+     */
+    private function setColumn($column, $key, $columns)
+    {
+        if (true === is_integer($key)) {
+            $this->columns[] = $column;
+        } else {
+            $this->columns[] = $key;
+        }
+
+        if ('csv' === $this->format && false === $this->skipHeader) {
+            //last item
+            if (isset($this->data[0])) {
+                //last item
+                if ($key != $this->getLastKeyFromArray($columns)) {
+                    $this->data[0] = $this->data[0] . $column . $this->separator;
+                } else {
+                    $this->data[0] = $this->data[0] . $column;
+                }
+            } else {
+                $this->data[] = $column . $this->separator;
+            }
+        } elseif (true === in_array($this->format, array('xls', 'html'))) {
+            //first item
+            if ($key === $this->getFirstKeyFromArray($columns)) {
+                $this->data .= '<tr>';
+            }
+
+            $this->data .= sprintf('<td>%s</td>', $column);
+            //last item
+            if ($key === $this->getLastKeyFromArray($columns)) {
+                $this->data .= '</tr>';
+            }
+        } elseif ('json' === $this->format) {
+            $this->data[0] = array_values($columns);
+        }
+    }
+
+    /**
      * @param array $columns
+     *
      * @return $this
      * @throws \RuntimeException
      */
@@ -361,42 +444,7 @@ class DataExporter
         }
 
         foreach ($columns as $key => $column) {
-            if (is_integer($key)) {
-                $this->columns[] = $column;
-            } else {
-                $this->columns[] = $key;
-            }
-
-            if ('csv' === $this->format && !$this->skipHeader) {
-
-                //last item
-                if (isset($this->data[0])) {
-                    //last item
-                    end($columns);
-                    if ($key != key($columns)) {
-                        $this->data[0] = $this->data[0] . $column . $this->separator;
-                    } else {
-                        $this->data[0] = $this->data[0] . $column;
-                    }
-                } else {
-                    $this->data[] = $column . $this->separator;
-                }
-            } elseif ('xls' === $this->format || 'html' === $this->format) {
-                //first item
-                reset($columns);
-                if ($key === key($columns)) {
-                    $this->data .= '<tr>';
-                }
-
-                $this->data .= sprintf('<td>%s</td>', $column);
-                //last item
-                end($columns);
-                if ($key === key($columns)) {
-                    $this->data .= '</tr>';
-                }
-            } elseif ('json' === $this->format) {
-                $this->data[0] = array_values($columns);
-            }
+            $this->setColumn($column, $key, $columns);
         }
 
         return $this;
@@ -406,19 +454,16 @@ class DataExporter
     /**
      * @return string
      */
-    public function prepareCSV()
+    private function prepareCSV()
     {
         return implode("\n", $this->data);
     }
 
     /**
-     * @param array $option
-     *
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return string|Response
      */
     public function render()
     {
-
         $response = new Response;
 
         switch ($this->format) {
