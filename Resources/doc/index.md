@@ -5,7 +5,7 @@ EEDataExporter
 
 ## Installation
 
-### Download EEDataexporterBundle using composer
+### Download EEDataExporterBundle using composer
 ```js
 {
     "require": {
