@@ -3,13 +3,14 @@
 namespace EE\DataExporterBundle\Service;
 
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\PropertyAccess\Exception\UnexpectedTypeException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
 /**
  * DataExporter class
  *
  * @author  Piotr Antosik <mail@piotrantosik.com>
- * @version Release: 0.4.2
+ * @version Release: 0.4.3
  */
 class DataExporter
 {
@@ -46,12 +47,22 @@ class DataExporter
     /**
      * @var boolean
      */
-    protected $memory;
+    protected $memory = false;
 
     /**
      * @var boolean
      */
-    protected $skipHeader;
+    protected $skipHeader = false;
+
+    /**
+     * @var boolean
+     */
+    protected $allowNull = false;
+
+    /**
+     * @var string
+     */
+    protected $nullReplace = '-';
 
     /**
      * @var string
@@ -116,19 +127,24 @@ class DataExporter
         //memory option
         if (true === in_array('memory', $options)) {
             $this->memory = true;
-        } else {
-            $this->memory = false;
         }
 
         //skip header
         if (true === in_array('skip_header', $options)) {
             $this->skipHeader = true;
-        } else {
-            $this->skipHeader = false;
         }
 
-        if (true === $this->skipHeader && !($this->format === 'csv')) {
+        if (true === $this->skipHeader && $this->format !== 'csv') {
             throw new \RuntimeException('Only CSV support skip_header option!');
+        }
+
+        //allow null data
+        if (true === in_array('allow_null', $options) && true === $options['allow_null']) {
+            $this->allowNull = true;
+
+            if (true === in_array('null_replace', $options)) {
+                $this->nullReplace = $options['null_replace'];
+            }
         }
 
         return $this;
@@ -299,11 +315,23 @@ class DataExporter
         $escape = $this->escape;
         $hooks = $this->hooks;
         $format = $this->format;
+        $allowNull = $this->allowNull;
+        $nullReplace = $this->nullReplace;
 
         $tempRow = array_map(
-            function ($column) use ($row, $separator, $escape, $hooks, $format) {
+            function ($column) use ($row, $separator, $escape, $hooks, $format, $allowNull, $nullReplace) {
+                try {
+                    $value = PropertyAccess::createPropertyAccessor()->getValue($row, $column);
+                } catch (UnexpectedTypeException $exception) {
+                    if (true === $allowNull) {
+                        $value = $nullReplace;
+                    } else {
+                        throw $exception;
+                    }
+                }
+
                 return DataExporter::escape(
-                    PropertyAccess::createPropertyAccessor()->getValue($row, $column),
+                    $value,
                     $separator,
                     $escape,
                     $column,
@@ -362,6 +390,33 @@ class DataExporter
             $this->addRow($row);
         }
 
+        //close tags
+        $this->closeData();
+
+        return $this;
+    }
+
+    /**
+     * @return $this
+     */
+    private function closeData()
+    {
+        switch ($this->format) {
+            case 'json':
+                //remove first row from data
+                unset($this->data[0]);
+                break;
+            case 'xls':
+                $this->closeXLS();
+                break;
+            case 'html':
+                $this->closeHTML();
+                break;
+            case 'xml':
+                $this->closeXML();
+                break;
+        }
+
         return $this;
     }
 
@@ -393,6 +448,8 @@ class DataExporter
      * @param string  $column
      * @param integer $key
      * @param array   $columns
+     *
+     * @return $this
      */
     private function setColumn($column, $key, $columns)
     {
@@ -428,6 +485,8 @@ class DataExporter
         } elseif ('json' === $this->format) {
             $this->data[0] = array_values($columns);
         }
+
+        return $this;
     }
 
     /**
@@ -478,20 +537,14 @@ class DataExporter
                 $response->setContent(json_encode($this->data));
                 break;
             case 'xls':
-                //close tags
-                $this->closeXLS();
                 $response->headers->set('Content-Type', 'application/vnd.ms-excel');
                 $response->setContent($this->data);
                 break;
             case 'html':
-                //close tags
-                $this->closeHTML();
                 $response->headers->set('Content-Type', 'text/html');
                 $response->setContent($this->data);
                 break;
             case 'xml':
-                //close tags
-                $this->closeXML();
                 $response->headers->set('Content-Type', 'application/xml');
                 $response->setContent($this->data);
                 break;
