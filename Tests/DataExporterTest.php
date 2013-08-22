@@ -128,7 +128,7 @@ class DataExporterTest extends \PHPUnit_Framework_TestCase
     public function testJSONMemoryEscapeExport()
     {
         $exporter = new DataExporter();
-        $exporter->setOptions('json', array('memory'));
+        $exporter->setOptions('json', array('memory' => true));
         $exporter->setColumns(array('[col1]', '[col2]', '[col3]'));
         $exporter->setData(
             array(
@@ -190,7 +190,7 @@ class DataExporterTest extends \PHPUnit_Framework_TestCase
     public function testCSVExportSkipHeader()
     {
         $exporter = new DataExporter();
-        $exporter->setOptions('csv', array('fileName' => 'file', 'separator' => ';', 'skip_header'));
+        $exporter->setOptions('csv', array('fileName' => 'file', 'separator' => ';', 'skip_header' => true));
         $exporter->setColumns(array('[col1]', '[col2]', '[col3]'));
         $exporter->setData(
             array(
@@ -210,7 +210,7 @@ class DataExporterTest extends \PHPUnit_Framework_TestCase
     public function testExportSkipHeaderException()
     {
         $exporter = new DataExporter();
-        $exporter->setOptions('html', array('fileName' => 'file', 'separator' => ';', 'skip_header'));
+        $exporter->setOptions('html', array('fileName' => 'file', 'separator' => ';', 'skip_header' => true));
     }
 
     public function hookTest($data)

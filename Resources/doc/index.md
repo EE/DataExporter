@@ -3,6 +3,9 @@ EEDataExporter
 
 [![Build Status](https://api.travis-ci.org/Antek88/DataExporter.png?branch=master)](http://travis-ci.org/Antek88/DataExporter)
 
+## BC Break from 1.0
+- skip_header and memory options must be a boolean
+
 ## Installation
 
 ### Download EEDataexporterBundle using composer
@@ -41,7 +44,7 @@ col1 is equals with $object->getCol1(), hasCol1(), isCol1(), $object->col1 or ma
 Maybe sometime you a need render data to variable.
 EEDataExporter support this. You must set parameter `memory` into setOption eg.:
 ```php
-$exporter->setOptions('csv', array('fileName' => 'file', 'separator' => ';', 'memory'));
+$exporter->setOptions('csv', array('fileName' => 'file', 'separator' => ';', 'memory' => true));
 //set data...
 $var = $exporter->render();
 ```
@@ -49,7 +52,7 @@ $var = $exporter->render();
 ### Skip header in CSV format
 If you want skip columns name in CSV format use flag skip_header in setOptions eg.:
 ```php
-$exporter->setOptions('csv', array('fileName' => 'file', 'separator' => ';', 'memory', 'skip_header'));
+$exporter->setOptions('csv', array('fileName' => 'file', 'separator' => ';', 'memory' => true, 'skip_header' => true));
 ```
 
 ### Hook a column

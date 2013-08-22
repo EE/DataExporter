@@ -113,8 +113,8 @@ class DataExporter
                 break;
         }
 
-        //convert key and values to lowercase
-        $options = array_map('strtolower', array_change_key_case($options, CASE_LOWER));
+        //convert key to lowercase
+        $options = array_change_key_case($options, CASE_LOWER);
 
         //fileName
         if (true === array_key_exists('filename', $options)) {
@@ -125,12 +125,12 @@ class DataExporter
         }
 
         //memory option
-        if (true === in_array('memory', $options)) {
+        if (true === array_key_exists('memory', $options) && true === $options['memory']) {
             $this->memory = true;
         }
 
         //skip header
-        if (true === in_array('skip_header', $options)) {
+        if (true === array_key_exists('skip_header', $options) && true === $options['skip_header']) {
             $this->skipHeader = true;
         }
 
@@ -139,10 +139,10 @@ class DataExporter
         }
 
         //allow null data
-        if (true === in_array('allow_null', $options) && true === $options['allow_null']) {
+        if (true === array_key_exists('allow_null', $options) && true === $options['allow_null']) {
             $this->allowNull = true;
 
-            if (true === in_array('null_replace', $options)) {
+            if (true === array_key_exists('null_replace', $options)) {
                 $this->nullReplace = $options['null_replace'];
             }
         }
