@@ -283,6 +283,9 @@ class DataExporter
         if (empty($this->columns)) {
             throw new \RuntimeException('First use setColumns to set columns to export!');
         }
+        
+        $this->data = array();
+        $this->setColumns($this->columns);
 
         $accessor = PropertyAccess::getPropertyAccessor();
         $separator = $this->separator;
@@ -359,6 +362,8 @@ class DataExporter
         if (empty($this->format)) {
             throw new \RuntimeException(sprintf('First use setOptions!'));
         }
+        
+        $this->columns = array();
 
         foreach ($columns as $key => $column) {
             if (is_integer($key)) {
