@@ -408,7 +408,7 @@ class DataExporter
      */
     public function prepareCSV()
     {
-        return implode("\n", $this->data);
+        return chr(239) . chr(187) . chr(191). implode("\n", $this->data);
     }
 
     /**
