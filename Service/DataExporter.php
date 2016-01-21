@@ -50,11 +50,17 @@ class DataExporter
     /**
      * @var array
      */
-    protected $supportedFormat = array('csv', 'xls', 'html', 'xml', 'json');
+    protected $supportedFormat = array('csv', 'xls', 'html', 'xml', 'json', 'docx');
+
     /**
      * @var array
      */
     protected $hooks = array();
+    /**
+     *
+     * @var type 
+     */
+    protected $images = array('.jpeg', '.png', '.jpg');
 
     /**
      * @param $format
@@ -83,6 +89,9 @@ class DataExporter
         } elseif ('html' === $this->format) {
             //options for html
             $this->openHTML();
+        } elseif ('docx' === $this->format) {
+            //options for html
+            $this->openDOCX();
         } elseif ('xml' === $this->format) {
             //options for xml
             $this->openXML();
@@ -172,6 +181,27 @@ class DataExporter
      * @return $this
      */
     public function closeHTML()
+    {
+        $this->data .= "</table></body></html>";
+
+        return $this;
+    }
+    
+    /**
+     * @return $this
+     */    
+    public function openDOCX()
+    {
+        $this->data = "<html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=" . $this->charset . "\" /><meta name=\"Generator\" content=\"https://github.com/EE/DataExporter\">";
+        $this->data .= "<style type=\"text/css\">            table.CSSTable {            border-width: 1px;            border-spacing: 0px;            border-style: solid;            border-color: black;            border-collapse: collapse;            }            table.CSSTable th {                border-width: 1px;                padding: 0px;                border-style: solid;               border-color: black;            }            table.CSSTable td {                border-width: 1px;                padding: 0px;                border-style: solid;                border-color: black;               }            </style>";        
+        $this->data .= "<body><table class=\"CSSTable\" style=\"width:100%\">";
+        return $this;    
+        
+    }    
+    /**
+     * @return $this
+     */
+    public function closeDOCX()
     {
         $this->data .= "</table></body></html>";
 
@@ -298,6 +328,11 @@ class DataExporter
                     break;
                 case 'xls':
                 case 'html':
+                case 'docx':
+                    if(in_array('skip', $this->columns)){
+                        $key = array_search('skip', $this->columns);
+                        unset($this->columns[$key]);
+                    }
                 case 'xml':
                     $tempRow = '';
                     break;
@@ -329,6 +364,17 @@ class DataExporter
                     $this->data .= '<tr>';
                     foreach ($tempRow as $val) {
                         $this->data .= '<td>' . $val . '</td>';
+                    }                    
+                    $this->data .= '</tr>';
+                    break;
+                case 'docx':
+                    $this->data .= '<tr>';
+                    foreach ($tempRow as $val) {
+                        if (is_int($this->strposArray($val, $this->images))) {
+                            $this->data .= '<td><img src="' . $val . '"/></td>';
+                        } else {
+                            $this->data .= '<td>' . $val . '</td>';
+                        }
                     }
                     $this->data .= '</tr>';
                     break;
@@ -380,6 +426,21 @@ class DataExporter
                     }
                 } else {
                     $this->data[] = $column . $this->separator;
+                }
+            } elseif ('docx' === $this->format) {
+                if (!in_array('skip', $columns)) {
+                    //first item
+                    reset($columns);
+                    if ($key === key($columns)) {
+                        $this->data .= '<tr>';
+                    }
+
+                    $this->data .= sprintf('<td>%s</td>', $column);
+                    //last item
+                    end($columns);
+                    if ($key === key($columns)) {
+                        $this->data .= '</tr>';
+                    }
                 }
             } elseif ('xls' === $this->format || 'html' === $this->format) {
                 //first item
@@ -450,6 +511,12 @@ class DataExporter
                 $response->headers->set('Content-Type', 'application/xml');
                 $response->setContent($this->data);
                 break;
+            case 'docx':
+                //close tags
+                $this->closeDOCX();
+                $response->headers->set('Content-Type', 'application/vnd.ms-word');
+                $response->setContent($this->data);
+                break;            
         }
 
         if ($this->memory) {
@@ -460,6 +527,24 @@ class DataExporter
         $response->headers->set('Content-Disposition', 'attachment; filename="' . $this->fileName . '"');
 
         return $response;
-
     }
+    
+    private function strposArray($haystack, $needles) 
+    {
+        if ( is_array($needles) ) {
+            foreach ($needles as $str) {
+                if ( is_array($str) ) {
+                    $pos = $this->strposArray($haystack, $str);
+                } else {
+                    $pos = strpos($haystack, $str);
+                }
+                if (false !== $pos) {
+                    return $pos;
+                }
+            }
+        } else {
+            return strpos($haystack, $needles);
+        }
+    }
+
 }
