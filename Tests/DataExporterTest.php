@@ -85,7 +85,25 @@ class DataExporterTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals($result, $exporter->render()->getContent());
     }
+    public function testDOCXExport()
+    {
+        $exporter = new DataExporter();
+        $exporter->setOptions('docx', array('fileName' => 'file'));
+        $exporter->setColumns(array('[col1]' => 'Column 1', '[col2]' => 'Column 2', '[col3]' => 'Column 3'));
+        $exporter->setData(
+            array(
+                array('col1' => '1a', 'col2' => '1b', 'col3' => '1c'),
+                array('col1' => '2a', 'col2' => '2b'),
+            )
+        );
 
+        $result = '<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" /><meta name="Generator" content="https://github.com/EE/DataExporter">'
+                . '<style type="text/css">            table.CSSTable {            border-width: 1px;            border-spacing: 0px;            border-style: solid;            border-color: black;            border-collapse: collapse;            }            table.CSSTable th {                border-width: 1px;                padding: 0px;                border-style: solid;               border-color: black;            }            table.CSSTable td {                border-width: 1px;                padding: 0px;                border-style: solid;                border-color: black;               }            </style>'
+                . '<body><table class="CSSTable" style="width:100%"><tr><td>Column 1</td><td>Column 2</td><td>Column 3</td></tr><tr><td>1a</td><td>1b</td><td>1c</td></tr><tr><td>2a</td><td>2b</td><td></td></tr>'
+                . '</table></body></html>';
+
+        $this->assertEquals($result, $exporter->render()->getContent());
+    }
     public function testXMLExport()
     {
         $exporter = new DataExporter();
