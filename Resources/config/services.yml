@@ -3,5 +3,5 @@ parameters:
 
 services:
     ee.dataexporter:
-        class: %ee.dataexporter.class%
+        class: "%ee.dataexporter.class%"
         public: true
