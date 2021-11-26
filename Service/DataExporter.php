@@ -200,7 +200,7 @@ class DataExporter
                 } else {
                     $obj = new $hooks[$column][0];
                 }
-                $data = $obj->$hooks[$column][1]($data);
+                $data = $obj->{$hooks[$column][1]}($data);
             }
         }
 
